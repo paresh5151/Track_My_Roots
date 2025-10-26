@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track My Roots</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #e6f2e6;
+            color: #2e4d2e;
+            text-align: center;
+            padding: 50px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 1.5em;
+            margin-bottom: 40px;
+            color: #3a6f3a;
+        }
+
+        input[type="text"],
+        input[list] {
+            padding: 10px;
+            width: 250px;
+            font-size: 1em;
+            border: 2px solid #2e4d2e;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 10px 20px;
+            margin-left: 10px;
+            font-size: 1em;
+            background-color: #3a6f3a;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #2e4d2e;
+        }
+
+        p {
+            margin-top: 20px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Track My Roots</h1>
+    <h2>Digital Tree Tracking System</h2>
+    <p>Enter Tree ID to locate on Google Maps</p>
+
+    <!-- Autocomplete input -->
+    <input list="treeIDs" id="treeID" placeholder="Enter Tree ID e.g., PCE001">
+    <datalist id="treeIDs">
+        <option value="PCE001">
+        <option value="PCE002">
+        <option value="PCE003">
+        <option value="PCE004">
+        <option value="PCE005">
+        <option value="PCE006">
+        <option value="PCE007">
+        <option value="PCE008">
+        <option value="PCE009">
+        <option value="PCE010">
+        <option value="PCE011">
+        <option value="PCE012">
+        <option value="PCE013">
+        <option value="PCE014">
+    </datalist>
+
+    <button onclick="locateTree()">Locate</button>
+
+    <p id="errorMsg" style="color:red;"></p>
+
+    <script>
+        // Tree data
+        const treeCoordinates = {
+            "PCE001": "16.97970,82.24267",
+            "PCE002": "16.97972,82.24258",
+            "PCE003": "16.97972,82.24256",
+            "PCE004": "16.97975,82.24253",
+            "PCE005": "16.97978,82.24250",
+            "PCE006": "16.97983,82.24231",
+            "PCE007": "16.97986,82.24225",
+            "PCE008": "16.97986,82.24222",
+            "PCE009": "16.97989,82.24219",
+            "PCE010": "16.97978,82.24250",
+            "PCE011": "16.97975,82.24253",
+            "PCE012": "16.97972,82.24256",
+            "PCE013": "16.97972,82.24258",
+            "PCE014": "16.97970,82.24267"
+        };
+
+        function locateTree() {
+            const id = document.getElementById("treeID").value.toUpperCase().trim();
+            const errorMsg = document.getElementById("errorMsg");
+            if (treeCoordinates[id]) {
+                const coords = treeCoordinates[id];
+                window.location.href = `https://www.google.com/maps?q=${coords}`;
+            } else {
+                errorMsg.textContent = "Invalid Tree ID. Please enter a valid ID (PCE001-PCE014).";
+            }
+        }
+    </script>
+</body>
+
+</html>
