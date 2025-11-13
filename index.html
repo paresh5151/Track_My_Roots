@@ -2,118 +2,205 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
     <title>Track My Roots</title>
+
+    <!-- Papaparse for CSV reading -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: #e6f2e6;
-            color: #2e4d2e;
-            text-align: center;
-            padding: 50px;
+            background: #f5f6f7;
+            margin: 0;
+            padding: 0;
         }
 
-        h1 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
+        /* Header */
+        .header {
+            background: #ffffff;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border-bottom: 2px solid #e0e0e0;
         }
 
-        h2 {
-            font-size: 1.5em;
-            margin-bottom: 40px;
-            color: #3a6f3a;
+        .header img {
+            height: 80px;
         }
 
-        input[type="text"],
-        input[list] {
-            padding: 10px;
-            width: 250px;
-            font-size: 1em;
-            border: 2px solid #2e4d2e;
-            border-radius: 5px;
+        .header-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #1e3a8a;
         }
 
-        button {
-            padding: 10px 20px;
-            margin-left: 10px;
-            font-size: 1em;
-            background-color: #3a6f3a;
+        /* Search section */
+        .search-box {
+            margin: 20px auto;
+            max-width: 700px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #bbb;
+            border-radius: 6px;
+        }
+
+        .search-box button {
+            padding: 12px 20px;
+            background: #2563eb;
             color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
         }
 
-        button:hover {
-            background-color: #2e4d2e;
+        /* Map + details layout */
+        .container {
+            display: flex;
+            gap: 20px;
+            padding: 20px;
         }
 
-        p {
-            margin-top: 20px;
-            font-size: 0.9em;
+        .map-box {
+            flex: 2;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+        }
+
+        #mapFrame {
+            width: 100%;
+            height: 400px;
+            border: 0;
+            border-radius: 8px;
+        }
+
+        .info-box {
+            flex: 1;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+        }
+
+        .info-img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+
+        .info-label {
+            font-weight: bold;
+            margin-top: 10px;
         }
     </style>
 </head>
 
 <body>
-    <h1>Track My Roots</h1>
-    <h2>Digital Tree Tracking System</h2>
-    <p>Enter Tree ID to locate on Google Maps</p>
 
-    <!-- Autocomplete input -->
-    <input list="treeIDs" id="treeID" placeholder="Enter Tree ID e.g., PCE001">
-    <datalist id="treeIDs">
-        <option value="PCE001">
-        <option value="PCE002">
-        <option value="PCE003">
-        <option value="PCE004">
-        <option value="PCE005">
-        <option value="PCE006">
-        <option value="PCE007">
-        <option value="PCE008">
-        <option value="PCE009">
-        <option value="PCE010">
-        <option value="PCE011">
-        <option value="PCE012">
-        <option value="PCE013">
-        <option value="PCE014">
-    </datalist>
+    <!-- ====================== HEADER ====================== -->
+    <div class="header">
+        <img src="logo.png" alt="College Logo">
+        <div class="header-title">JNTUK Kakinada - Track My Roots</div>
+    </div>
 
-    <button onclick="locateTree()">Locate</button>
+    <!-- ====================== SEARCH BAR ==================== -->
+    <div class="search-box">
+        <input id="treeIdInput" type="text" placeholder="Enter Tree ID e.g., jntuk0001">
+        <button onclick="lookupTree()">Locate</button>
+    </div>
 
-    <p id="errorMsg" style="color:red;"></p>
+    <!-- ====================== MAP + DETAILS ================== -->
+    <div class="container">
+
+        <!-- MAP PREVIEW -->
+        <div class="map-box">
+            <h3>Location Preview</h3>
+            <iframe id="mapFrame"></iframe>
+        </div>
+
+        <!-- PLANT DETAILS -->
+        <div class="info-box">
+            <h3>Plant Details</h3>
+            <img id="plantPhoto" class="info-img" src="uploads/placeholder.png" alt="Plant Image">
+
+            <p class="info-label">Tree ID:</p>
+            <p id="infoId">—</p>
+
+            <p class="info-label">Tree Name:</p>
+            <p id="infoName">—</p>
+
+            <p class="info-label">Planted Year:</p>
+            <p id="infoYear">—</p>
+
+            <p class="info-label">Maintained By:</p>
+            <p id="infoMaintainer">—</p>
+
+            <p class="info-label">Email:</p>
+            <p id="infoEmail">—</p>
+        </div>
+
+    </div>
 
     <script>
-        // Tree data
-        const treeCoordinates = {
-            "PCE001": "16.97970,82.24267",
-            "PCE002": "16.97972,82.24258",
-            "PCE003": "16.97972,82.24256",
-            "PCE004": "16.97975,82.24253",
-            "PCE005": "16.97978,82.24250",
-            "PCE006": "16.97983,82.24231",
-            "PCE007": "16.97986,82.24225",
-            "PCE008": "16.97986,82.24222",
-            "PCE009": "16.97989,82.24219",
-            "PCE010": "16.97978,82.24250",
-            "PCE011": "16.97975,82.24253",
-            "PCE012": "16.97972,82.24256",
-            "PCE013": "16.97972,82.24258",
-            "PCE014": "16.97970,82.24267"
-        };
+        let PLANT_DATA = [];
 
-        function locateTree() {
-            const id = document.getElementById("treeID").value.toUpperCase().trim();
-            const errorMsg = document.getElementById("errorMsg");
-            if (treeCoordinates[id]) {
-                const coords = treeCoordinates[id];
-                window.location.href = `https://www.google.com/maps?q=${coords}`;
-            } else {
-                errorMsg.textContent = "Invalid Tree ID. Please enter a valid ID (PCE001-PCE014).";
+        // ========== Load CSV containing plant info ==========
+        Papa.parse("trees.csv", {
+            download: true,
+            header: true,
+            complete: function (results) {
+                PLANT_DATA = results.data;
+                console.log("Loaded plant data:", PLANT_DATA);
             }
+        });
+
+        // ========== Fetch and display tree info ==========
+        function lookupTree() {
+            const id = document.getElementById("treeIdInput").value.trim().toLowerCase();
+
+            if (!id) {
+                alert("Please enter a Tree ID");
+                return;
+            }
+
+            const record = PLANT_DATA.find(
+                r => r.tree_id?.toLowerCase() === id || r.id?.toLowerCase() === id
+            );
+
+            if (!record) {
+                alert("Tree ID not found!");
+                return;
+            }
+
+            // Update map
+            if (record.lat && record.lng) {
+                document.getElementById("mapFrame").src =
+                    `https://www.google.com/maps?q=${record.lat},${record.lng}&z=18&output=embed`;
+            }
+
+            // Update plant details
+            document.getElementById("infoId").textContent = record.id || record.tree_id;
+            document.getElementById("infoName").textContent = record.name || record.tree_name;
+            document.getElementById("infoYear").textContent = record.age || record.planted_year;
+            document.getElementById("infoMaintainer").textContent = record.maintainer || record.maintained_by;
+            document.getElementById("infoEmail").textContent = record.email || record.maintainer_email;
+
+            // Photo logic
+            const photo = record.photo ? record.photo : "uploads/placeholder.png";
+            document.getElementById("plantPhoto").src = photo;
         }
     </script>
+
 </body>
 
 </html>
