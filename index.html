@@ -1,83 +1,60 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Track My Roots — JNTUK</title>
-
-    <!-- PapaParse for CSV reading -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-
     <style>
         html,
         body {
             height: 100%;
             margin: 0;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Arial
         }
 
         body {
-            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-            background-image: url('/images/background.png');
+            background-image: url('/images/background.ppg');
             background-size: cover;
-            background-position: center center;
-            color: #0f172a;
-            min-height: 100%;
+            background-position: center;
+            color: #0f172a
         }
 
-        .page-overlay {
-            min-height: 100%;
-            box-sizing: border-box;
+        .overlay {
+            min-height: 100vh
         }
 
         .container {
             max-width: 1100px;
             margin: 0 auto;
-            padding: 22px;
+            padding: 24px
         }
 
         .header {
             display: flex;
             align-items: center;
-            gap: 16px;
-            padding: 8px 0 18px 0;
+            gap: 12px
         }
 
         .logo {
             height: 72px;
             width: 72px;
-            object-fit: contain;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 6px;
-        }
-
-        .brand {
-            font-weight: 700;
-            font-size: 20px;
-            color: #065f46;
-        }
-
-        .subtitle {
-            font-size: 13px;
-            color: #334155;
+            object-fit: contain
         }
 
         .search-row {
             display: flex;
             gap: 10px;
-            margin: 12px 0 6px 0;
-            align-items: center;
             position: relative;
+            margin-top: 16px
         }
 
-        .search-row input[type="text"] {
+        .search-row input {
             flex: 1;
-            padding: 12px 14px;
+            padding: 12px;
             border-radius: 8px;
-            border: 1px solid #cbd5e1;
-            font-size: 15px;
-            background: white;
+            border: 1px solid #cbd5e1
         }
 
         .search-row button {
@@ -87,66 +64,45 @@
             background: #0ea5a3;
             color: white;
             font-weight: 600;
-            cursor: pointer;
+            cursor: pointer
         }
 
         .suggestions {
             position: absolute;
-            top: calc(100% + 8px);
+            top: 48px;
             left: 0;
-            right: 180px;
-            /* leave space for the Locate button */
-            background: white;
+            right: 140px;
+            background: #fff;
             border: 1px solid #e2e8f0;
             border-radius: 8px;
-            max-height: 220px;
-            overflow-y: auto;
-            box-shadow: 0 6px 18px rgba(2, 6, 23, 0.08);
-            z-index: 50;
+            max-height: 260px;
+            overflow: auto;
+            display: none;
+            z-index: 50
         }
 
         .suggestion-item {
-            padding: 10px 12px;
-            font-size: 14px;
-            cursor: pointer;
+            padding: 10px;
             border-bottom: 1px solid #f1f5f9;
+            cursor: pointer
         }
 
-        .suggestion-item:last-child {
-            border-bottom: none;
-        }
-
-        .suggestion-item:hover,
-        .suggestion-item.active {
-            background: #eef2ff;
-        }
-
-        .small-note {
-            font-size: 12px;
-            color: #475569;
-            margin-top: 6px;
+        .suggestion-item:hover {
+            background: #eef2ff
         }
 
         .main {
             display: flex;
-            gap: 18px;
-            align-items: flex-start;
-            margin-top: 18px;
+            gap: 16px;
+            margin-top: 18px
         }
 
         .map-panel {
             flex: 2;
-            background: white;
+            background: #fff;
             border-radius: 10px;
             padding: 12px;
-            border: 1px solid #e6eef2;
-            box-shadow: 0 6px 18px rgba(2, 6, 23, 0.06);
-        }
-
-        .map-panel h3 {
-            margin: 0 0 8px 0;
-            font-size: 16px;
-            color: #0f172a;
+            box-shadow: 0 6px 18px rgba(2, 6, 23, 0.06)
         }
 
         iframe#mapFrame {
@@ -154,17 +110,15 @@
             height: 420px;
             border: 0;
             border-radius: 8px;
-            background: #efefef;
+            background: #efefef
         }
 
-        .details-panel {
+        .details {
             flex: 1;
-            background: white;
+            background: #fff;
             border-radius: 10px;
             padding: 12px;
-            border: 1px solid #e6eef2;
-            box-shadow: 0 6px 18px rgba(2, 6, 23, 0.04);
-            min-width: 240px;
+            box-shadow: 0 6px 18px rgba(2, 6, 23, 0.04)
         }
 
         .plant-photo {
@@ -172,8 +126,7 @@
             height: 220px;
             object-fit: cover;
             border-radius: 8px;
-            display: block;
-            background: #fafafa;
+            display: none
         }
 
         .no-photo {
@@ -183,430 +136,174 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #94a3b8;
             background: #f8fafc;
-            font-size: 14px;
-        }
-
-        .label {
-            color: #475569;
-            font-size: 12px;
-            margin-top: 8px;
-        }
-
-        .info-row {
-            margin-top: 10px;
-            font-size: 14px;
-            color: #0f172a;
+            color: #64748b
         }
 
         .ref-block {
-            margin-top: 10px;
+            margin-top: 12px;
             padding: 10px;
             background: #f8fafc;
             border-radius: 8px;
             border: 1px solid #e2e8f0;
-            font-size: 13px;
-        }
-
-        .route-link {
-            display: inline-block;
-            margin-top: 8px;
-            padding: 8px 10px;
-            background: #2563eb;
-            color: white;
-            border-radius: 6px;
-            text-decoration: none;
-            font-size: 13px;
+            display: none;
+            font-size: 15px;
+            font-weight: 600;
+            color: #0f172a
         }
 
         @media (max-width:880px) {
             .main {
-                flex-direction: column;
+                flex-direction: column
             }
 
             iframe#mapFrame {
-                height: 300px;
-            }
-
-            .plant-photo,
-            .no-photo {
-                height: 200px;
-            }
-
-            .suggestions {
-                right: 140px;
+                height: 300px
             }
         }
     </style>
 </head>
 
 <body>
-    <div class="page-overlay">
+    <div class="overlay">
         <div class="container">
-
             <div class="header">
-                <img src="/images/logo.png" alt="College Logo" class="logo" />
+                <img src="/images/logo.png" alt="logo" class="logo" />
                 <div>
-                    <div class="brand">JNTUK Kakinada — Track My Roots</div>
-                    <div class="subtitle">Digital Tree Tracking System</div>
+                    <h2 style="margin:0">JNTUK Kakinada — Track My Roots</h2>
+                    <div style="color:#475569;font-size:13px">Digital Tree Tracking System</div>
                 </div>
             </div>
 
             <div class="search-row" style="max-width:820px;">
-                <input id="treeInput" type="text" placeholder="Enter Tree ID (e.g. jntuk0001) or Name (e.g. Ashoka)"
-                    autocomplete="off" />
+                <input id="treeInput" placeholder="Enter Tree ID or Name" autocomplete="off" />
                 <button id="locateBtn">Locate</button>
-
-                <!-- Suggestions dropdown -->
-                <div id="suggestions" class="suggestions" style="display:none;" role="listbox"
-                    aria-label="Search suggestions"></div>
+                <div id="suggestions" class="suggestions" role="listbox" aria-label="Search suggestions"></div>
             </div>
-
-            <div class="small-note">Tip: Start typing to see suggestions. CSV used: <code>new file 1 (1).csv</code>
-                (same folder).</div>
 
             <div class="main">
                 <div class="map-panel">
-                    <h3>Location Preview</h3>
+                    <h3 style="margin:0 0 8px 0">Location Preview</h3>
                     <iframe id="mapFrame" title="map preview" src=""></iframe>
                 </div>
 
-                <aside class="details-panel">
-                    <h3>Plant Details</h3>
-
-                    <img id="plantPhoto" class="plant-photo" src="" alt="Plant photo" style="display:none;" />
+                <aside class="details">
+                    <h3 style="margin:0">Plant Details</h3>
+                    <img id="plantPhoto" class="plant-photo" src="" alt="plant" />
                     <div id="noPhoto" class="no-photo" style="display:none;">No photo available</div>
 
-                    <div class="label">Tree ID</div>
-                    <div id="infoId" class="info-row">—</div>
+                    <div style="margin-top:10px"><strong>ID:</strong> <span id="infoId">—</span></div>
+                    <div style="margin-top:8px"><strong>Name:</strong> <span id="infoName">—</span></div>
+                    <div style="margin-top:8px"><strong>Planted Year:</strong> <span id="infoYear">—</span></div>
+                    <div style="margin-top:8px"><strong>Maintained by:</strong> <span id="infoMaintainer">—</span></div>
+                    <div style="margin-top:8px"><strong>Email:</strong> <span id="infoEmail">—</span></div>
 
-                    <div class="label">Tree Name</div>
-                    <div id="infoName" class="info-row">—</div>
-
-                    <div class="label">Planted Year</div>
-                    <div id="infoYear" class="info-row">—</div>
-
-                    <div class="label">Maintained by</div>
-                    <div id="infoMaintainer" class="info-row">—</div>
-
-                    <div class="label">Email</div>
-                    <div id="infoEmail" class="info-row">—</div>
-
-                    <div id="refBlock" class="ref-block" style="display:none;">
-                        <div style="font-weight:600;">Reference point</div>
-                        <div id="refName" style="margin-top:6px;color:#0f172a;"></div>
-                        <div id="refCoords" style="font-size:13px;color:#475569;margin-top:6px;"></div>
-                        <div id="distanceText" style="font-size:14px;margin-top:8px;"></div>
-                        <a id="routeLink" class="route-link" href="#" target="_blank" rel="noreferrer"
-                            style="display:none;">Show route in Google Maps</a>
-                    </div>
-
+                    <div id="refBlock" class="ref-block"><span id="distanceOnly"></span></div>
                 </aside>
             </div>
-
         </div>
     </div>
 
     <script>
-        /* Helpers: normalize headers */
-        function normalizeKey(k) { return String(k || "").trim().toLowerCase().replace(/\s+/g, "_"); }
+        /* === PHOTO NORMALIZER (Section C) === */
+        function normalizePhotoField(raw) {
+            if (raw === null || raw === undefined) return "";
+            let s = String(raw).trim();
+            if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) s = s.slice(1, -1).trim();
+            if (!s) return "";
+            if (/^https?:\/\//i.test(s)) { if (s.startsWith('http://')) s = s.replace(/^http:\/\//i, 'https://'); return s; }
+            if (s.startsWith('/')) return s;
+            return '/uploads/photos/' + s.replace(/^\/*/, '');
+        }
 
-        /* DMS -> decimal helpers (same robust parser as before) */
+        function normalizeKey(k) { return String(k || "").trim().toLowerCase().replace(/\s+/g, '_'); }
+
         function dmsPartToDecimal(part) {
-            if (!part) return null;
-            part = String(part).trim();
-            part = part.replace(/°/g, " ").replace(/'/g, " ").replace(/"/g, " ").replace(/,/g, " ");
+            if (!part) return null; part = String(part).trim();
+            part = part.replace(/°/g, ' ').replace(/'/g, ' ').replace(/"/g, ' ').replace(/,/g, ' ');
             const m = part.match(/([0-9]+(?:\.[0-9]+)?)\s+([0-9]+(?:\.[0-9]+)?)?\s*([0-9]+(?:\.[0-9]+)?)?\s*([NSEWnsew])?/);
-            if (!m) {
-                const num = parseFloat(part);
-                if (!isNaN(num)) return num;
-                return null;
-            }
-            const deg = parseFloat(m[1] || 0);
-            const min = parseFloat(m[2] || 0);
-            const sec = parseFloat(m[3] || 0);
-            let dec = Math.abs(deg) + (min / 60) + (sec / 3600);
-            const dir = (m[4] || "").toUpperCase();
-            if (dir === "S" || dir === "W") dec = -dec;
-            if (String(m[1]).trim().startsWith("-")) dec = -dec;
-            return dec;
-        }
-        function parseReferencePointField(s) {
-            if (!s) return null;
-            s = String(s).trim();
-            if (s.indexOf(",") !== -1 && /[0-9]/.test(s)) {
-                const parts = s.split(",");
-                if (parts.length >= 2) {
-                    const a = parseFloat(parts[0].replace(/[^\d\.\-]/g, ""));
-                    const b = parseFloat(parts[1].replace(/[^\d\.\-]/g, ""));
-                    if (!isNaN(a) && !isNaN(b)) return { lat: a, lng: b };
-                }
-            }
-            const idx = s.search(/[NnSs]/);
-            if (idx !== -1) {
-                const ew = s.slice(idx + 1).search(/[EeWw]/);
-                if (ew !== -1) {
-                    const first = s.slice(0, idx + 1).trim();
-                    const second = s.slice(idx + 1).trim();
-                    const lat = dmsPartToDecimal(first);
-                    const lng = dmsPartToDecimal(second);
-                    if (lat !== null && lng !== null) return { lat, lng };
-                } else {
-                    const tokens = s.split(/\s+/);
-                    if (tokens.length >= 2) {
-                        const part1 = tokens.slice(0, Math.ceil(tokens.length / 2)).join(" ");
-                        const part2 = tokens.slice(Math.ceil(tokens.length / 2)).join(" ");
-                        const lat = dmsPartToDecimal(part1);
-                        const lng = dmsPartToDecimal(part2);
-                        if (lat !== null && lng !== null) return { lat, lng };
-                    }
-                }
-            }
-            const nums = s.match(/-?\d+(?:\.\d+)?/g);
-            if (nums && nums.length >= 2) {
-                const a = parseFloat(nums[0]), b = parseFloat(nums[1]);
-                return { lat: a, lng: b };
-            }
-            return null;
+            if (!m) { const num = parseFloat(part); if (!isNaN(num)) return num; return null; }
+            const deg = parseFloat(m[1] || 0), min = parseFloat(m[2] || 0), sec = parseFloat(m[3] || 0);
+            let dec = Math.abs(deg) + (min / 60) + (sec / 3600); const dir = (m[4] || '').toUpperCase();
+            if (dir === 'S' || dir === 'W') dec = -dec; if (String(m[1]).trim().startsWith('-')) dec = -dec; return dec;
         }
 
-        /* Haversine (meters) */
-        function haversineDistanceMeters(lat1, lon1, lat2, lon2) {
-            if (!lat1 || !lon1 || !lat2 || !lon2) return null;
-            const toNum = v => Number(String(v).trim());
-            lat1 = toNum(lat1); lon1 = toNum(lon1); lat2 = toNum(lat2); lon2 = toNum(lon2);
-            if (isNaN(lat1) || isNaN(lon1) || isNaN(lat2) || isNaN(lon2)) return null;
-            const R = 6371000; const toRad = deg => deg * Math.PI / 180;
-            const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
-            const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return R * c;
-        }
+        function parseReferencePointField(s) { if (!s) return null; s = String(s).trim(); if (s.indexOf(',') !== -1 && /[0-9]/.test(s)) { const parts = s.split(','); if (parts.length >= 2) { const a = parseFloat(parts[0].replace(/[^\d\.\-]/g, '')); const b = parseFloat(parts[1].replace(/[^\d\.\-]/g, '')); if (!isNaN(a) && !isNaN(b)) return { lat: a, lng: b }; } } const idx = s.search(/[NnSs]/); if (idx !== -1) { const ew = s.slice(idx + 1).search(/[EeWw]/); if (ew !== -1) { const first = s.slice(0, idx + 1).trim(); const second = s.slice(idx + 1).trim(); const lat = dmsPartToDecimal(first); const lng = dmsPartToDecimal(second); if (lat !== null && lng !== null) return { lat, lng }; } else { const tokens = s.split(/\s+/); if (tokens.length >= 2) { const part1 = tokens.slice(0, Math.ceil(tokens.length / 2)).join(' '); const part2 = tokens.slice(Math.ceil(tokens.length / 2)).join(' '); const lat = dmsPartToDecimal(part1); const lng = dmsPartToDecimal(part2); if (lat !== null && lng !== null) return { lat, lng }; } } } const nums = s.match(/-?\d+(?:\.\d+)?/g); if (nums && nums.length >= 2) { return { lat: parseFloat(nums[0]), lng: parseFloat(nums[1]) }; } return null; }
 
-        /* DATA */
+        function haversineDistanceMeters(lat1, lon1, lat2, lon2) { if (!lat1 || !lon1 || !lat2 || !lon2) return null; const toNum = v => Number(String(v).trim()); lat1 = toNum(lat1); lon1 = toNum(lon1); lat2 = toNum(lat2); lon2 = toNum(lon2); if (isNaN(lat1) || isNaN(lon1) || isNaN(lat2) || isNaN(lon2)) return null; const R = 6371000; const toRad = deg => deg * Math.PI / 180; const dLat = toRad(lat2 - lat1); const dLon = toRad(lon2 - lon1); const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2); const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)); return R * c; }
+
         let PLANTS = [];
+        let SUGGESTIONS = [];
 
-        /* Load your CSV (file name exactly as uploaded) */
         Papa.parse("trees.csv", {
-            download: true,
-            header: true,
-            skipEmptyLines: true,
-            complete: function (res) {
-                PLANTS = (res.data || []).map(row => {
+            download: true, header: true, skipEmptyLines: true, complete: function (res) {
+                // Note: if your CSV/Excel is named differently, change this path to trees.csv or plants.csv
+                const rows = res.data || [];
+                PLANTS = rows.map(row => {
                     const norm = {};
                     for (let k in row) norm[normalizeKey(k)] = row[k];
-                    // plant coords
+                    // get lat/lng
                     let lat = norm.gps_coordinate || norm.gps || norm.coords || norm.lat || "";
                     let lng = norm.lng || norm.longitude || "";
-                    if ((!lat || !lng) && lat && lat.indexOf(",") !== -1) {
-                        const p = String(lat).split(",");
-                        if (p.length >= 2) { lat = p[0].trim(); lng = p[1].trim(); }
-                    }
-                    // parse reference point DMS -> decimal
-                    const refFieldRaw = norm.reference_point || norm.reference || norm.ref || norm['reference_point'] || norm['reference_point_'] || norm['reference_point__'] || "";
-                    const refCoords = parseReferencePointField(refFieldRaw);
-                    const refName = (norm.department_name || norm.department || norm.ref_name || norm.nearby_department || norm['department_name'] || "").toString().trim();
-
-                    // photo mapping
-                    let photo = (norm.photo || norm['photo'] || norm['photo '] || "").toString().trim();
-                    if (photo && !/^https?:\/\//i.test(photo) && !photo.startsWith("/")) photo = "/uploads/photos/" + photo;
-
-                    const id = (norm.tree_id || norm.id || norm['tree_id'] || norm['tree_id_'] || "").toString().trim();
-                    const name = (norm.tree_name || norm.name || norm['tree_name'] || norm['tree_name_'] || "").toString().trim();
-
+                    if ((!lat || !lng) && lat && lat.indexOf(",") !== -1) { const p = String(lat).split(","); if (p.length >= 2) { lat = p[0].trim(); lng = p[1].trim(); } }
+                    const refCoords = parseReferencePointField(norm.reference_point || norm['reference point'] || norm.reference || '');
+                    const photoRaw = norm.photo || norm.photo_url || norm.image || norm['photo '] || '';
+                    const photo = normalizePhotoField(photoRaw);
+                    const id = (norm.tree_id || norm.id || '').toString().trim();
+                    const name = (norm.tree_name || norm.name || '').toString().trim();
                     return {
-                        id, name,
-                        lat, lng,
-                        photo,
-                        maintained_by: norm['maintained_by'] || norm['maintained_by_'] || norm['maintained_by '] || norm['maintained_by__'] || norm['maintained_by___'] || norm['maintained by'] || norm['maintained_by'] || norm['maintainedby'] || norm['maintainer'] || norm['maintained_by'] || norm['maintained_by '],
-                        email: norm['email_id'] || norm['email'] || norm['email_id '] || norm['email id'] || "",
-                        planted_year: norm['planted_year'] || norm['planted_year_'] || norm['planted year'] || norm['plantedyear'] || norm['planted_year'],
-                        reference: {
-                            name: refName,
-                            lat: refCoords ? refCoords.lat : "",
-                            lng: refCoords ? refCoords.lng : ""
-                        }
+                        id, name, lat, lng, photo,
+                        planted_year: norm.planted_year || norm.year || '',
+                        maintainer: { name: norm.maintained_by || norm.maintainer || '', email: norm.email_id || norm.email || '' },
+                        reference: { name: norm.department_name || norm.department || '', lat: refCoords ? refCoords.lat : '', lng: refCoords ? refCoords.lng : '' }
                     };
                 });
 
-                // build suggestion index for fast search
-                buildSuggestionIndex();
-                console.log("Loaded", PLANTS.length, "rows");
+                SUGGESTIONS = PLANTS.map((p, i) => ({ label: (p.id ? ('[' + p.id + '] ': '') + p.name, id: p.id, name: p.name, lower: (((p.id || '') + ' ' + (p.name || '')).toLowerCase()) }));
+                console.log('Loaded', PLANTS.length, 'rows');
             }
         });
 
-        /* Suggestion index */
-        let SUGGESTIONS = []; // array of {label, id, name, lower}
-
-        function buildSuggestionIndex() {
-            SUGGESTIONS = PLANTS.map(p => {
-                const label = (p.id ? p.id : "") + (p.name ? (" — " + p.name) : "");
-                return { label, id: p.id || "", name: p.name || "", lower: label.toLowerCase() };
-            });
-        }
-
-        /* UI: suggestions dropdown */
         const inputEl = document.getElementById('treeInput');
         const suggestionsEl = document.getElementById('suggestions');
 
-        function showSuggestions(query) {
-            const q = String(query || "").trim().toLowerCase();
-            if (!q) { suggestionsEl.style.display = 'none'; suggestionsEl.innerHTML = ''; return; }
-            // find up to 20 matches where label contains q (prefix matches prioritized)
-            const results = SUGGESTIONS
-                .map((s, i) => ({ ...s, idx: i }))
-                .filter(s => s.lower.indexOf(q) !== -1)
-                .sort((a, b) => {
-                    const ai = a.lower.indexOf(q);
-                    const bi = b.lower.indexOf(q);
-                    if (ai !== bi) return ai - bi; // smaller index first
-                    return a.label.localeCompare(b.label);
-                })
-                .slice(0, 20);
-
-            if (results.length === 0) { suggestionsEl.style.display = 'none'; suggestionsEl.innerHTML = ''; return; }
-
-            suggestionsEl.innerHTML = results.map(r => `
-    <div class="suggestion-item" role="option" data-idx="${r.idx}">
-      ${escapeHtml(r.label)}
-    </div>
-  `).join('');
-            suggestionsEl.style.display = 'block';
-        }
-
-        /* helper to escape HTML */
         function escapeHtml(s) { return String(s).replace(/[&<>"']/g, function (m) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": "&#39;" }[m]; }); }
 
-        /* click handler for suggestions (delegation) */
-        suggestionsEl.addEventListener('click', function (e) {
-            const item = e.target.closest('.suggestion-item');
-            if (!item) return;
-            const idx = item.getAttribute('data-idx');
-            const selected = SUGGESTIONS[Number(idx)];
-            if (!selected) return;
-            // fill input with id (or name) and perform lookup
-            inputEl.value = selected.id || selected.name || selected.label;
-            suggestionsEl.style.display = 'none';
-            lookupTree();
-        });
+        function showSuggestions(query) { const q = String(query || '').trim().toLowerCase(); if (!q) { suggestionsEl.style.display = 'none'; suggestionsEl.innerHTML = ''; return; } const results = SUGGESTIONS.filter(s => s.lower.indexOf(q) !== -1).slice(0, 20); if (results.length === 0) { suggestionsEl.style.display = 'none'; return; } suggestionsEl.innerHTML = results.map((r, idx) => `<div class="suggestion-item" data-idx="${idx}">${escapeHtml(r.label)}</div>`).join(''); suggestionsEl.style.display = 'block'; }
 
-        /* keyboard navigation for suggestions */
-        let activeSuggestion = -1;
-        inputEl.addEventListener('keydown', function (e) {
-            if (suggestionsEl.style.display === 'block') {
-                const items = suggestionsEl.querySelectorAll('.suggestion-item');
-                if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    activeSuggestion = Math.min(activeSuggestion + 1, items.length - 1);
-                    updateActiveSuggestion(items);
-                } else if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    activeSuggestion = Math.max(activeSuggestion - 1, 0);
-                    updateActiveSuggestion(items);
-                } else if (e.key === 'Enter') {
-                    // handled in main Enter handler
-                } else if (e.key === 'Escape') {
-                    suggestionsEl.style.display = 'none';
-                    activeSuggestion = -1;
-                }
-            }
-        });
-        function updateActiveSuggestion(items) {
-            items.forEach(it => it.classList.remove('active'));
-            if (activeSuggestion >= 0 && items[activeSuggestion]) items[activeSuggestion].classList.add('active');
-        }
+        suggestionsEl.addEventListener('click', function (e) { const item = e.target.closest('.suggestion-item'); if (!item) return; const idx = Number(item.getAttribute('data-idx')); const sel = SUGGESTIONS[idx]; if (!sel) return; inputEl.value = sel.id || sel.name || ''; suggestionsEl.style.display = 'none'; lookupTree(); });
 
-        /* show suggestions while typing (debounced) */
-        let debounceTimer = null;
-        inputEl.addEventListener('input', function (e) {
-            activeSuggestion = -1;
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => {
-                showSuggestions(inputEl.value);
-            }, 120);
-        });
+        let debounceTimer = null; inputEl.addEventListener('input', () => { clearTimeout(debounceTimer); debounceTimer = setTimeout(() => showSuggestions(inputEl.value), 120); });
+        document.addEventListener('click', (e) => { if (!e.target.closest('.search-row')) suggestionsEl.style.display = 'none'; });
 
-        /* close suggestions when clicking outside */
-        document.addEventListener('click', function (e) {
-            if (!e.target.closest('.search-row')) {
-                suggestionsEl.style.display = 'none';
-            }
-        });
+        function qrImageUrl(payload, size = 300) { const chs = size + 'x' + size; const chl = encodeURIComponent(payload); return `https://chart.googleapis.com/chart?chs=${chs}&cht=qr&chl=${chl}`; }
 
-        /* show record in UI (map, photo, details, ref/distance) */
-        function showRecord(record) {
-            if (record.lat && record.lng) {
-                document.getElementById('mapFrame').src = `https://www.google.com/maps?q=${record.lat},${record.lng}&z=18&output=embed`;
-            } else document.getElementById('mapFrame').src = "";
-
-            const img = document.getElementById('plantPhoto');
-            const noPhoto = document.getElementById('noPhoto');
-            if (record.photo && record.photo.trim() !== "") {
-                img.src = record.photo; img.style.display = "block"; noPhoto.style.display = "none";
-            } else { img.src = ""; img.style.display = "none"; noPhoto.style.display = "flex"; }
-
-            document.getElementById('infoId').textContent = record.id || "—";
-            document.getElementById('infoName').textContent = record.name || "—";
-            document.getElementById('infoYear').textContent = record.planted_year || "—";
-            document.getElementById('infoMaintainer').textContent = record.maintained_by || "—";
-            document.getElementById('infoEmail').textContent = record.email || "—";
-
-            const refBlock = document.getElementById('refBlock');
-            if (record.reference && record.reference.name && record.reference.lat && record.reference.lng) {
-                document.getElementById('refName').textContent = record.reference.name;
-                document.getElementById('refCoords').textContent = `(${record.reference.lat}, ${record.reference.lng})`;
-                const d = haversineDistanceMeters(record.lat, record.lng, record.reference.lat, record.reference.lng);
-                const distEl = document.getElementById('distanceText');
-                if (d === null) distEl.textContent = "Distance: not available (invalid coordinates)";
-                else { distEl.textContent = d < 1000 ? `Distance: ${Math.round(d)} m` : `Distance: ${(d / 1000).toFixed(2)} km`; }
-                const routeLink = document.getElementById('routeLink');
-                const origin = encodeURIComponent(`${record.reference.lat},${record.reference.lng}`);
-                const dest = encodeURIComponent(`${record.lat},${record.lng}`);
-                routeLink.href = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}&travelmode=walking`;
-                routeLink.style.display = "inline-block";
-                refBlock.style.display = "block";
-            } else {
-                refBlock.style.display = "none";
-            }
-        }
-
-        /* clear */
-        function clearDisplay() {
-            document.getElementById('mapFrame').src = "";
-            document.getElementById('plantPhoto').src = "";
-            document.getElementById('plantPhoto').style.display = "none";
-            document.getElementById('noPhoto').style.display = "none";
-            document.getElementById('infoId').textContent = "—";
-            document.getElementById('infoName').textContent = "—";
-            document.getElementById('infoYear').textContent = "—";
-            document.getElementById('infoMaintainer').textContent = "—";
-            document.getElementById('infoEmail').textContent = "—";
-            document.getElementById('refBlock').style.display = "none";
-        }
-
-        /* lookup logic */
         function lookupTree() {
-            const q = (document.getElementById('treeInput').value || "").trim().toLowerCase();
-            if (!q) { alert("Enter a Tree ID or Name"); return; }
-
-            // exact id match
-            let rec = PLANTS.find(r => (r.id || "").toLowerCase() === q);
-            if (!rec) rec = PLANTS.find(r => (r.name || "").toLowerCase() === q);
-            if (!rec) rec = PLANTS.find(r => (r.name || "").toLowerCase().includes(q));
-            if (!rec) rec = PLANTS.find(r => (r.id || "").toLowerCase().includes(q));
-            if (!rec) { alert("No matching record found in the sheet."); clearDisplay(); return; }
-            // hide suggestions
-            document.getElementById('suggestions').style.display = 'none';
+            const q = (inputEl.value || '').trim().toLowerCase(); if (!q) { alert('Enter a Tree ID or Name'); return; }
+            let rec = PLANTS.find(r => (r.id || '').toLowerCase() === q) || PLANTS.find(r => (r.name || '').toLowerCase() === q) || PLANTS.find(r => (r.name || '').toLowerCase().includes(q)) || PLANTS.find(r => (r.id || '').toLowerCase().includes(q));
+            if (!rec) { alert('No matching record found.'); clearDisplay(); return; }
             showRecord(rec);
         }
 
-        /* events */
-        document.getElementById('locateBtn').addEventListener('click', lookupTree);
-        document.getElementById('treeInput').addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') { e.preventDefault(); lookupTree(); }
-        });
+        function clearDisplay() { document.getElementById('mapFrame').src = ''; const img = document.getElementById('plantPhoto'); img.src = ''; img.style.display = 'none'; document.getElementById('noPhoto').style.display = 'none'; document.getElementById('infoId').textContent = '—'; document.getElementById('infoName').textContent = '—'; document.getElementById('infoYear').textContent = '—'; document.getElementById('infoMaintainer').textContent = '—'; document.getElementById('infoEmail').textContent = '—'; document.getElementById('refBlock').style.display = 'none'; }
 
+        function showRecord(record) {
+            if (record.lat && record.lng) document.getElementById('mapFrame').src = `https://www.google.com/maps?q=${record.lat},${record.lng}&z=18&output=embed`; else document.getElementById('mapFrame').src = '';
+            document.getElementById('infoId').textContent = record.id || '—'; document.getElementById('infoName').textContent = record.name || '—'; document.getElementById('infoYear').textContent = record.planted_year || '—'; document.getElementById('infoMaintainer').textContent = record.maintainer?.name || '—'; document.getElementById('infoEmail').textContent = record.maintainer?.email || '—';
+
+            const img = document.getElementById('plantPhoto'); const noPhoto = document.getElementById('noPhoto');
+            console.log('DEBUG: showRecord photo ->', record.photo);
+            if (record.photo && record.photo.trim() !== '') {
+                img.onerror = function () { console.error('IMAGE FAILED ->', record.photo); img.style.display = 'none'; noPhoto.style.display = 'flex'; };
+                img.onload = function () { img.style.display = 'block'; noPhoto.style.display = 'none'; };
+                img.src = record.photo;
+            } else { img.src = ''; img.style.display = 'none'; noPhoto.style.display = 'flex'; }
+
+            if (record.reference && record.reference.name && record.reference.lat && record.reference.lng) { const d = haversineDistanceMeters(record.lat, record.lng, record.reference.lat, record.reference.lng); const distText = d === null ? 'unknown distance' : (d < 1000 ? `${Math.round(d)} m` : `${(d / 1000).toFixed(2)} km`); document.getElementById('distanceOnly').textContent = `Located ${distText} from ${record.reference.name}`; document.getElementById('refBlock').style.display = 'block'; } else { document.getElementById('refBlock').style.display = 'none'; }
+        }
+
+        document.getElementById('locateBtn').addEventListener('click', lookupTree);
+        inputEl.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); lookupTree(); } });
     </script>
 </body>
 
