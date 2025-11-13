@@ -10,7 +10,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
     <style>
-        /* ===== Full-page background ===== */
         html,
         body {
             height: 100%;
@@ -20,31 +19,24 @@
         body {
             font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
             background-image: url('/images/background.png');
-            /* <-- put your full-page bg here */
             background-size: cover;
             background-position: center center;
             background-repeat: no-repeat;
             color: #0f172a;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
             min-height: 100%;
         }
 
-        /* overlay for better readability (semi-opaque white) */
         .page-overlay {
-            /* adjust opacity as needed */
             min-height: 100%;
             box-sizing: border-box;
         }
 
-        /* layout wrapper */
         .container {
             max-width: 1100px;
             margin: 0 auto;
             padding: 22px;
         }
 
-        /* header */
         .header {
             display: flex;
             align-items: center;
@@ -72,7 +64,6 @@
             color: #334155;
         }
 
-        /* search */
         .search-row {
             display: flex;
             gap: 10px;
@@ -105,7 +96,6 @@
             margin-top: 6px;
         }
 
-        /* main layout: map + details */
         .main {
             display: flex;
             gap: 18px;
@@ -184,7 +174,26 @@
             margin-top: 8px;
         }
 
-        /* responsive */
+        .ref-block {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            font-size: 13px;
+        }
+
+        .route-link {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 8px 10px;
+            background: #2563eb;
+            color: white;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 13px;
+        }
+
         @media (max-width:880px) {
             .main {
                 flex-direction: column;
@@ -204,11 +213,8 @@
 
 <body>
 
-    <!-- Page overlay keeps text readable over background -->
     <div class="page-overlay">
         <div class="container">
-
-            <!-- HEADER -->
             <div class="header">
                 <img src="/images/logo.png" alt="College Logo" class="logo" />
                 <div>
@@ -217,15 +223,14 @@
                 </div>
             </div>
 
-            <!-- SEARCH -->
             <div class="search-row">
                 <input id="treeInput" type="text" placeholder="Enter Tree ID (e.g. jntuk0001) or Name (e.g. Ashoka)" />
                 <button id="locateBtn">Locate</button>
             </div>
             <div class="small-note">Tip: If a matching record is found in the sheet, an embedded map preview will appear
-                below.</div>
+                below. The sheet may include a reference point (department) and coordinates — distance will be
+                calculated if present.</div>
 
-            <!-- MAIN: MAP + DETAILS -->
             <div class="main" style="margin-top:16px;">
                 <div class="map-panel">
                     <h3>Location Preview</h3>
@@ -235,7 +240,6 @@
                 <aside class="details-panel">
                     <h3>Plant Details</h3>
 
-                    <!-- image area: will be hidden when no photo -->
                     <img id="plantPhoto" class="plant-photo" src="" alt="Plant photo" style="display:none;" />
                     <div id="noPhoto" class="no-photo" style="display:none;">No photo available</div>
 
@@ -253,106 +257,150 @@
 
                     <div class="label">Email</div>
                     <div id="infoEmail" class="info-row">—</div>
+
+                    <!-- Reference and distance block (displayed directly under the last plant detail) -->
+                    <div id="refBlock" class="ref-block" style="display:none;">
+                        <div style="font-weight:600;">Reference point</div>
+                        <div id="refName" style="margin-top:6px;color:#0f172a;"></div>
+                        <div id="refCoords" style="font-size:13px;color:#475569;margin-top:6px;"></div>
+                        <div id="distanceText" style="font-size:14px;margin-top:8px;"></div>
+                        <a id="routeLink" class="route-link" href="#" target="_blank" rel="noreferrer"
+                            style="display:none;">Show route in Google Maps</a>
+                    </div>
+
                 </aside>
             </div>
-
-        </div> <!-- .container -->
-    </div> <!-- .page-overlay -->
+        </div>
+    </div>
 
     <script>
-        /*
-          Behavior:
-          - Loads plants.csv (CSV headers should include at least one of: Tree ID / TreeID / id, Tree Name / name, GPS Coordinate or lat+lng, Photo)
-          - Search on locate: exact match on id (case-insensitive), fallback to partial name match.
-          - Embedded map preview inserted into iframe (no redirect).
-          - If record has photo (absolute URL or path starting with / or filename), show it; otherwise hide the img and show "No photo available".
-        */
+        /* normalize header names */
+        function normalizeKey(k) { return String(k || "").trim().toLowerCase().replace(/\s+/g, "_"); }
 
-        /* === Utility: normalize header names === */
-        function normalizeKey(k) {
-            return String(k || "").trim().toLowerCase().replace(/\s+/g, "_");
+        /* haversine (meters) */
+        function haversineDistanceMeters(lat1, lon1, lat2, lon2) {
+            if (!lat1 || !lon1 || !lat2 || !lon2) return null;
+            const toNum = v => Number(String(v).trim());
+            lat1 = toNum(lat1); lon1 = toNum(lon1); lat2 = toNum(lat2); lon2 = toNum(lon2);
+            if (isNaN(lat1) || isNaN(lon1) || isNaN(lat2) || isNaN(lon2)) return null;
+            const R = 6371000, toRad = deg => deg * Math.PI / 180;
+            const dLat = toRad(lat2 - lat1), dLon = toRad(lon2 - lon1);
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
         }
 
+        /* load CSV and normalize rows */
         let PLANTS = [];
-
-        // load CSV (plants.csv should be placed alongside the HTML)
-        Papa.parse("plants.csv", {
+        Papa.parse("trees.csv", { // using your uploaded CSV filename
             download: true,
             header: true,
             skipEmptyLines: true,
             complete: function (res) {
-                // normalize rows: canonical fields id,name,lat,lng,photo,maintainer,email,planted_year
                 PLANTS = (res.data || []).map((row) => {
                     const normalized = {};
-                    for (let key in row) {
-                        normalized[normalizeKey(key)] = row[key];
-                    }
+                    for (let key in row) normalized[normalizeKey(key)] = row[key];
 
-                    // Try to extract lat/lng
-                    let lat = normalized.lat || normalized.latitude || "";
-                    let lng = normalized.lng || normalized.longitude || "";
+                    // extract plant lat/lng (various header names)
+                    let lat = normalized.lat || normalized.latitude || normalized.gps_lat || "";
+                    let lng = normalized.lng || normalized.longitude || normalized.gps_lng || "";
+                    // also support combined GPS coordinate like "16.97,82.24"
                     if ((!lat || !lng) && (normalized.gps_coordinate || normalized.gps || normalized.gpscoords)) {
                         const g = (normalized.gps_coordinate || normalized.gps || normalized.gpscoords).toString();
                         if (g.indexOf(",") !== -1) {
-                            const p = g.split(",");
-                            lat = p[0].trim();
-                            lng = p[1].trim();
+                            const p = g.split(","); lat = p[0].trim(); lng = p[1].trim();
                         }
                     }
 
-                    // Normalize id/name fields
+                    // id and plant name
                     const id = normalized.id || normalized.tree_id || normalized.treeid || "";
-                    const name = normalized.name || normalized.tree_name || normalized.tree || "";
+                    const plantName = normalized.tree_name || normalized.name || normalized.plant_name || "";
 
-                    // photo handling: use as-is if absolute URL or starts with '/', else treat as filename and use /uploads/photos/<filename>
+                    // photo handling
                     let photo = (normalized.photo || "").toString().trim();
-                    if (!photo) photo = ""; // keep empty (no placeholder)
-                    else if (!/^https?:\/\//i.test(photo) && !photo.startsWith("/")) {
-                        photo = "/uploads/photos/" + photo;
-                    }
+                    if (!photo) photo = "";
+                    else if (!/^https?:\/\//i.test(photo) && !photo.startsWith("/")) photo = "/uploads/photos/" + photo;
 
+                    // maintainer
                     const maintainer = normalized.maintainer || normalized.maintained_by || normalized.maintainer_name || "";
                     const email = normalized.email || normalized.maintainer_email || normalized.email_id || "";
 
+                    // reference point: accept many variants. If refName missing but CSV has department/name columns and ref coords present, prefer department/name
+                    const refNameCandidates = [
+                        normalized.reference_name, normalized.ref_name, normalized.nearby_department,
+                        normalized.department, normalized.dept, normalized.ref_point, normalized.reference
+                    ];
+                    let refName = refNameCandidates.find(x => x && String(x).trim()) || "";
+
+                    // ref coords - many forms
+                    let refLat = normalized.reference_lat || normalized.ref_lat || normalized.department_lat || normalized.dept_lat || normalized.ref_latitude || normalized.reference_latitude || "";
+                    let refLng = normalized.reference_lng || normalized.ref_lng || normalized.department_lng || normalized.dept_lng || normalized.ref_longitude || normalized.reference_longitude || "";
+
+                    // Special logic: if ref coords exist but refName empty, fallback to department/name fields:
+                    if ((!refName || !String(refName).trim()) && (refLat || refLng)) {
+                        // prefer a column called 'department' or 'name' (if 'name' is used for department)
+                        refName = normalized.department || normalized.dept || normalized.name || "";
+                    }
+
                     return {
-                        id, name, lat, lng,
-                        photo, maintained_by: maintainer, email, planted_year: normalized.planted_year || normalized.planted_year || normalized.plantedyear || normalized.year || ""
+                        id,
+                        name: plantName,
+                        lat, lng,
+                        photo,
+                        maintained_by: maintainer,
+                        email,
+                        planted_year: normalized.planted_year || normalized.year || "",
+                        reference: { name: refName, lat: refLat, lng: refLng }
                     };
                 });
-
-                // You can inspect PLANTS in console for debugging
-                console.log("Loaded plants:", PLANTS.length, PLANTS[0] || {});
+                console.log("Loaded plants:", PLANTS.length);
             }
         });
 
-        /* === UI handlers === */
+        /* UI helpers */
         function showRecord(record) {
-            // Map iframe
-            if (record.lat && record.lng) {
-                document.getElementById('mapFrame').src = `https://www.google.com/maps?q=${record.lat},${record.lng}&z=18&output=embed`;
-            } else {
-                document.getElementById('mapFrame').src = "";
-            }
+            if (record.lat && record.lng) document.getElementById('mapFrame').src = `https://www.google.com/maps?q=${record.lat},${record.lng}&z=18&output=embed`;
+            else document.getElementById('mapFrame').src = "";
 
-            // Photo behavior: show image only if photo non-empty
-            const img = document.getElementById('plantPhoto');
-            const noPhoto = document.getElementById('noPhoto');
-            if (record.photo && record.photo.trim() !== "") {
-                img.src = record.photo;
-                img.style.display = "block";
-                noPhoto.style.display = "none";
-            } else {
-                img.src = "";
-                img.style.display = "none";
-                noPhoto.style.display = "flex";
-            }
+            const img = document.getElementById('plantPhoto'), noPhoto = document.getElementById('noPhoto');
+            if (record.photo && record.photo.trim() !== "") { img.src = record.photo; img.style.display = "block"; noPhoto.style.display = "none"; }
+            else { img.src = ""; img.style.display = "none"; noPhoto.style.display = "flex"; }
 
-            // Fill details
             document.getElementById('infoId').textContent = record.id || "—";
             document.getElementById('infoName').textContent = record.name || "—";
             document.getElementById('infoYear').textContent = record.planted_year || "—";
             document.getElementById('infoMaintainer').textContent = record.maintained_by || "—";
             document.getElementById('infoEmail').textContent = record.email || "—";
+
+            const ref = record.reference || {};
+            const refBlock = document.getElementById('refBlock');
+            if (ref && (ref.lat || ref.lng)) {
+                const refNameEl = document.getElementById('refName'), refCoordsEl = document.getElementById('refCoords');
+                const distTextEl = document.getElementById('distanceText'), routeLink = document.getElementById('routeLink');
+
+                // decide name: use reference.name if present, otherwise indicate 'Reference point'
+                const showName = (ref.name && ref.name.trim()) ? ref.name : "Reference point";
+                refNameEl.textContent = showName;
+                refCoordsEl.textContent = `(${ref.lat || "n/a"}, ${ref.lng || "n/a"})`;
+
+                const d = haversineDistanceMeters(record.lat, record.lng, ref.lat, ref.lng);
+                if (d === null) distTextEl.textContent = "Distance: not available (invalid coordinates)";
+                else {
+                    let disp = (d < 1000) ? `${Math.round(d)} m` : `${(d / 1000).toFixed(2)} km`;
+                    distTextEl.textContent = `Distance: ${disp}`;
+                }
+
+                if (ref.lat && ref.lng && record.lat && record.lng) {
+                    const origin = encodeURIComponent(`${ref.lat},${ref.lng}`);
+                    const dest = encodeURIComponent(`${record.lat},${record.lng}`);
+                    routeLink.href = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${dest}&travelmode=walking`;
+                    routeLink.style.display = "inline-block";
+                } else routeLink.style.display = "none";
+
+                refBlock.style.display = "block";
+            } else {
+                refBlock.style.display = "none";
+            }
         }
 
         function clearDisplay() {
@@ -365,36 +413,25 @@
             document.getElementById('infoYear').textContent = "—";
             document.getElementById('infoMaintainer').textContent = "—";
             document.getElementById('infoEmail').textContent = "—";
+            document.getElementById('refBlock').style.display = "none";
         }
 
-        /* Main search/lookup */
+        /* Main lookup */
         function lookupTree() {
             const q = (document.getElementById('treeInput').value || "").trim().toLowerCase();
             if (!q) { alert("Enter a Tree ID or Name"); return; }
 
-            // exact id match
             let rec = PLANTS.find(r => (r.id || "").toLowerCase() === q);
-
-            // try by tree_id, fallback to partial name match
             if (!rec) rec = PLANTS.find(r => (r.name || "").toLowerCase() === q);
             if (!rec) rec = PLANTS.find(r => (r.name || "").toLowerCase().includes(q));
             if (!rec) rec = PLANTS.find(r => (r.id || "").toLowerCase().includes(q));
 
-            if (!rec) {
-                alert("No matching record found in the sheet.");
-                clearDisplay();
-                return;
-            }
-
+            if (!rec) { alert("No matching record found in the sheet."); clearDisplay(); return; }
             showRecord(rec);
         }
 
         document.getElementById('locateBtn').addEventListener('click', lookupTree);
-
-        // also allow Enter key in input
-        document.getElementById('treeInput').addEventListener('keydown', function (e) {
-            if (e.key === 'Enter') { e.preventDefault(); lookupTree(); }
-        });
+        document.getElementById('treeInput').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); lookupTree(); } });
     </script>
 </body>
 
