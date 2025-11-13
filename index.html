@@ -2,205 +2,401 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <title>Track My Roots</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Track My Roots — JNTUK</title>
 
-    <!-- Papaparse for CSV reading -->
+    <!-- PapaParse for CSV reading -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
     <style>
+        /* ===== Full-page background ===== */
+        html,
         body {
-            font-family: Arial, sans-serif;
-            background: #f5f6f7;
+            height: 100%;
             margin: 0;
-            padding: 0;
         }
 
-        /* Header */
+        body {
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+            background-image: url('/images/background.png');
+            /* <-- put your full-page bg here */
+            background-size: cover;
+            background-position: center center;
+            background-repeat: no-repeat;
+            color: #0f172a;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            min-height: 100%;
+        }
+
+        /* overlay for better readability (semi-opaque white) */
+        .page-overlay {
+            background: rgba(255, 255, 255, 0.88);
+            /* adjust opacity as needed */
+            min-height: 100%;
+            box-sizing: border-box;
+        }
+
+        /* layout wrapper */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 22px;
+        }
+
+        /* header */
         .header {
-            background: #ffffff;
-            padding: 20px;
             display: flex;
             align-items: center;
-            gap: 20px;
-            border-bottom: 2px solid #e0e0e0;
+            gap: 16px;
+            padding: 8px 0 18px 0;
         }
 
-        .header img {
-            height: 80px;
+        .header .logo {
+            height: 72px;
+            width: 72px;
+            object-fit: contain;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 6px;
         }
 
-        .header-title {
-            font-size: 28px;
-            font-weight: bold;
-            color: #1e3a8a;
+        .brand {
+            font-weight: 700;
+            font-size: 20px;
+            color: #065f46;
         }
 
-        /* Search section */
-        .search-box {
-            margin: 20px auto;
-            max-width: 700px;
+        .subtitle {
+            font-size: 13px;
+            color: #334155;
+        }
+
+        /* search */
+        .search-row {
             display: flex;
             gap: 10px;
+            margin: 12px 0 18px 0;
+            align-items: center;
         }
 
-        .search-box input {
+        .search-row input[type="text"] {
             flex: 1;
-            padding: 12px;
-            font-size: 16px;
-            border: 1px solid #bbb;
-            border-radius: 6px;
+            padding: 12px 14px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            font-size: 15px;
+            background: white;
         }
 
-        .search-box button {
-            padding: 12px 20px;
-            background: #2563eb;
-            color: white;
+        .search-row button {
+            padding: 11px 16px;
+            border-radius: 8px;
             border: none;
-            border-radius: 6px;
+            background: #0ea5a3;
+            color: white;
+            font-weight: 600;
             cursor: pointer;
         }
 
-        /* Map + details layout */
-        .container {
-            display: flex;
-            gap: 20px;
-            padding: 20px;
+        .small-note {
+            font-size: 12px;
+            color: #475569;
+            margin-top: 6px;
         }
 
-        .map-box {
+        /* main layout: map + details */
+        .main {
+            display: flex;
+            gap: 18px;
+            align-items: flex-start;
+        }
+
+        .map-panel {
             flex: 2;
             background: white;
-            padding: 15px;
             border-radius: 10px;
-            border: 1px solid #ccc;
+            padding: 12px;
+            border: 1px solid #e6eef2;
+            box-shadow: 0 6px 18px rgba(2, 6, 23, 0.06);
         }
 
-        #mapFrame {
+        .map-panel h3 {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            color: #0f172a;
+        }
+
+        iframe#mapFrame {
             width: 100%;
-            height: 400px;
+            height: 420px;
             border: 0;
             border-radius: 8px;
+            background: #efefef;
         }
 
-        .info-box {
+        .details-panel {
             flex: 1;
             background: white;
-            padding: 15px;
             border-radius: 10px;
-            border: 1px solid #ccc;
+            padding: 12px;
+            border: 1px solid #e6eef2;
+            box-shadow: 0 6px 18px rgba(2, 6, 23, 0.04);
+            min-width: 240px;
         }
 
-        .info-img {
+        .details-panel h3 {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            color: #0f172a;
+        }
+
+        .plant-photo {
             width: 100%;
             height: 220px;
             object-fit: cover;
-            border-radius: 10px;
+            border-radius: 8px;
+            display: block;
+            background: #fafafa;
         }
 
-        .info-label {
-            font-weight: bold;
+        .no-photo {
+            width: 100%;
+            height: 220px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            background: #f8fafc;
+            font-size: 14px;
+        }
+
+        .info-row {
             margin-top: 10px;
+            font-size: 14px;
+            color: #0f172a;
+        }
+
+        .label {
+            color: #475569;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        /* responsive */
+        @media (max-width:880px) {
+            .main {
+                flex-direction: column;
+            }
+
+            iframe#mapFrame {
+                height: 300px;
+            }
+
+            .plant-photo,
+            .no-photo {
+                height: 200px;
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <!-- ====================== HEADER ====================== -->
-    <div class="header">
-        <img src="logo.png" alt="College Logo">
-        <div class="header-title">JNTUK Kakinada - Track My Roots</div>
-    </div>
+    <!-- Page overlay keeps text readable over background -->
+    <div class="page-overlay">
+        <div class="container">
 
-    <!-- ====================== SEARCH BAR ==================== -->
-    <div class="search-box">
-        <input id="treeIdInput" type="text" placeholder="Enter Tree ID e.g., jntuk0001">
-        <button onclick="lookupTree()">Locate</button>
-    </div>
+            <!-- HEADER -->
+            <div class="header">
+                <img src="/images/logo.png" alt="College Logo" class="logo" />
+                <div>
+                    <div class="brand">JNTUK Kakinada — Track My Roots</div>
+                    <div class="subtitle">Digital Tree Tracking System</div>
+                </div>
+            </div>
 
-    <!-- ====================== MAP + DETAILS ================== -->
-    <div class="container">
+            <!-- SEARCH -->
+            <div class="search-row">
+                <input id="treeInput" type="text" placeholder="Enter Tree ID (e.g. jntuk0001) or Name (e.g. Ashoka)" />
+                <button id="locateBtn">Locate</button>
+            </div>
+            <div class="small-note">Tip: If a matching record is found in the sheet, an embedded map preview will appear
+                below.</div>
 
-        <!-- MAP PREVIEW -->
-        <div class="map-box">
-            <h3>Location Preview</h3>
-            <iframe id="mapFrame"></iframe>
-        </div>
+            <!-- MAIN: MAP + DETAILS -->
+            <div class="main" style="margin-top:16px;">
+                <div class="map-panel">
+                    <h3>Location Preview</h3>
+                    <iframe id="mapFrame" title="map preview" src=""></iframe>
+                </div>
 
-        <!-- PLANT DETAILS -->
-        <div class="info-box">
-            <h3>Plant Details</h3>
-            <img id="plantPhoto" class="info-img" src="uploads/placeholder.png" alt="Plant Image">
+                <aside class="details-panel">
+                    <h3>Plant Details</h3>
 
-            <p class="info-label">Tree ID:</p>
-            <p id="infoId">—</p>
+                    <!-- image area: will be hidden when no photo -->
+                    <img id="plantPhoto" class="plant-photo" src="" alt="Plant photo" style="display:none;" />
+                    <div id="noPhoto" class="no-photo" style="display:none;">No photo available</div>
 
-            <p class="info-label">Tree Name:</p>
-            <p id="infoName">—</p>
+                    <div class="label">Tree ID</div>
+                    <div id="infoId" class="info-row">—</div>
 
-            <p class="info-label">Planted Year:</p>
-            <p id="infoYear">—</p>
+                    <div class="label">Tree Name</div>
+                    <div id="infoName" class="info-row">—</div>
 
-            <p class="info-label">Maintained By:</p>
-            <p id="infoMaintainer">—</p>
+                    <div class="label">Planted Year</div>
+                    <div id="infoYear" class="info-row">—</div>
 
-            <p class="info-label">Email:</p>
-            <p id="infoEmail">—</p>
-        </div>
+                    <div class="label">Maintained by</div>
+                    <div id="infoMaintainer" class="info-row">—</div>
 
-    </div>
+                    <div class="label">Email</div>
+                    <div id="infoEmail" class="info-row">—</div>
+                </aside>
+            </div>
+
+        </div> <!-- .container -->
+    </div> <!-- .page-overlay -->
 
     <script>
-        let PLANT_DATA = [];
+        /*
+          Behavior:
+          - Loads plants.csv (CSV headers should include at least one of: Tree ID / TreeID / id, Tree Name / name, GPS Coordinate or lat+lng, Photo)
+          - Search on locate: exact match on id (case-insensitive), fallback to partial name match.
+          - Embedded map preview inserted into iframe (no redirect).
+          - If record has photo (absolute URL or path starting with / or filename), show it; otherwise hide the img and show "No photo available".
+        */
 
-        // ========== Load CSV containing plant info ==========
-        Papa.parse("trees.csv", {
+        /* === Utility: normalize header names === */
+        function normalizeKey(k) {
+            return String(k || "").trim().toLowerCase().replace(/\s+/g, "_");
+        }
+
+        let PLANTS = [];
+
+        // load CSV (plants.csv should be placed alongside the HTML)
+        Papa.parse("plants.csv", {
             download: true,
             header: true,
-            complete: function (results) {
-                PLANT_DATA = results.data;
-                console.log("Loaded plant data:", PLANT_DATA);
+            skipEmptyLines: true,
+            complete: function (res) {
+                // normalize rows: canonical fields id,name,lat,lng,photo,maintainer,email,planted_year
+                PLANTS = (res.data || []).map((row) => {
+                    const normalized = {};
+                    for (let key in row) {
+                        normalized[normalizeKey(key)] = row[key];
+                    }
+
+                    // Try to extract lat/lng
+                    let lat = normalized.lat || normalized.latitude || "";
+                    let lng = normalized.lng || normalized.longitude || "";
+                    if ((!lat || !lng) && (normalized.gps_coordinate || normalized.gps || normalized.gpscoords)) {
+                        const g = (normalized.gps_coordinate || normalized.gps || normalized.gpscoords).toString();
+                        if (g.indexOf(",") !== -1) {
+                            const p = g.split(",");
+                            lat = p[0].trim();
+                            lng = p[1].trim();
+                        }
+                    }
+
+                    // Normalize id/name fields
+                    const id = normalized.id || normalized.tree_id || normalized.treeid || "";
+                    const name = normalized.name || normalized.tree_name || normalized.tree || "";
+
+                    // photo handling: use as-is if absolute URL or starts with '/', else treat as filename and use /uploads/photos/<filename>
+                    let photo = (normalized.photo || "").toString().trim();
+                    if (!photo) photo = ""; // keep empty (no placeholder)
+                    else if (!/^https?:\/\//i.test(photo) && !photo.startsWith("/")) {
+                        photo = "/uploads/photos/" + photo;
+                    }
+
+                    const maintainer = normalized.maintainer || normalized.maintained_by || normalized.maintainer_name || "";
+                    const email = normalized.email || normalized.maintainer_email || normalized.email_id || "";
+
+                    return {
+                        id, name, lat, lng,
+                        photo, maintained_by: maintainer, email, planted_year: normalized.planted_year || normalized.planted_year || normalized.plantedyear || normalized.year || ""
+                    };
+                });
+
+                // You can inspect PLANTS in console for debugging
+                console.log("Loaded plants:", PLANTS.length, PLANTS[0] || {});
             }
         });
 
-        // ========== Fetch and display tree info ==========
-        function lookupTree() {
-            const id = document.getElementById("treeIdInput").value.trim().toLowerCase();
-
-            if (!id) {
-                alert("Please enter a Tree ID");
-                return;
-            }
-
-            const record = PLANT_DATA.find(
-                r => r.tree_id?.toLowerCase() === id || r.id?.toLowerCase() === id
-            );
-
-            if (!record) {
-                alert("Tree ID not found!");
-                return;
-            }
-
-            // Update map
+        /* === UI handlers === */
+        function showRecord(record) {
+            // Map iframe
             if (record.lat && record.lng) {
-                document.getElementById("mapFrame").src =
-                    `https://www.google.com/maps?q=${record.lat},${record.lng}&z=18&output=embed`;
+                document.getElementById('mapFrame').src = `https://www.google.com/maps?q=${record.lat},${record.lng}&z=18&output=embed`;
+            } else {
+                document.getElementById('mapFrame').src = "";
             }
 
-            // Update plant details
-            document.getElementById("infoId").textContent = record.id || record.tree_id;
-            document.getElementById("infoName").textContent = record.name || record.tree_name;
-            document.getElementById("infoYear").textContent = record.age || record.planted_year;
-            document.getElementById("infoMaintainer").textContent = record.maintainer || record.maintained_by;
-            document.getElementById("infoEmail").textContent = record.email || record.maintainer_email;
+            // Photo behavior: show image only if photo non-empty
+            const img = document.getElementById('plantPhoto');
+            const noPhoto = document.getElementById('noPhoto');
+            if (record.photo && record.photo.trim() !== "") {
+                img.src = record.photo;
+                img.style.display = "block";
+                noPhoto.style.display = "none";
+            } else {
+                img.src = "";
+                img.style.display = "none";
+                noPhoto.style.display = "flex";
+            }
 
-            // Photo logic
-            const photo = record.photo ? record.photo : "uploads/placeholder.png";
-            document.getElementById("plantPhoto").src = photo;
+            // Fill details
+            document.getElementById('infoId').textContent = record.id || "—";
+            document.getElementById('infoName').textContent = record.name || "—";
+            document.getElementById('infoYear').textContent = record.planted_year || "—";
+            document.getElementById('infoMaintainer').textContent = record.maintained_by || "—";
+            document.getElementById('infoEmail').textContent = record.email || "—";
         }
-    </script>
 
+        function clearDisplay() {
+            document.getElementById('mapFrame').src = "";
+            document.getElementById('plantPhoto').src = "";
+            document.getElementById('plantPhoto').style.display = "none";
+            document.getElementById('noPhoto').style.display = "none";
+            document.getElementById('infoId').textContent = "—";
+            document.getElementById('infoName').textContent = "—";
+            document.getElementById('infoYear').textContent = "—";
+            document.getElementById('infoMaintainer').textContent = "—";
+            document.getElementById('infoEmail').textContent = "—";
+        }
+
+        /* Main search/lookup */
+        function lookupTree() {
+            const q = (document.getElementById('treeInput').value || "").trim().toLowerCase();
+            if (!q) { alert("Enter a Tree ID or Name"); return; }
+
+            // exact id match
+            let rec = PLANTS.find(r => (r.id || "").toLowerCase() === q);
+
+            // try by tree_id, fallback to partial name match
+            if (!rec) rec = PLANTS.find(r => (r.name || "").toLowerCase() === q);
+            if (!rec) rec = PLANTS.find(r => (r.name || "").toLowerCase().includes(q));
+            if (!rec) rec = PLANTS.find(r => (r.id || "").toLowerCase().includes(q));
+
+            if (!rec) {
+                alert("No matching record found in the sheet.");
+                clearDisplay();
+                return;
+            }
+
+            showRecord(rec);
+        }
+
+        document.getElementById('locateBtn').addEventListener('click', lookupTree);
+
+        // also allow Enter key in input
+        document.getElementById('treeInput').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') { e.preventDefault(); lookupTree(); }
+        });
+    </script>
 </body>
 
 </html>
