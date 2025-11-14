@@ -194,6 +194,9 @@
                     <div style="margin-top:10px;"><strong>Planted Year:</strong> <span id="infoYear">—</span></div>
                     <div style="margin-top:10px;"><strong>Maintained by:</strong> <span id="infoMaintainer">—</span>
                     </div>
+                    <!-- New: Roll No (placed below Maintained by) -->
+                    <div style="margin-top:10px;"><strong>Roll No:</strong> <span id="infoRoll">—</span></div>
+
                     <div style="margin-top:10px;"><strong>Email:</strong> <span id="infoEmail">—</span></div>
 
                     <!-- clickable reference block -->
@@ -265,7 +268,7 @@
                         for (let k in row) norm[normalizeKey(k)] = row[k];
 
                         // gps_coordinate may be "lat,lng" or some other format
-                        let gps = String(norm.gps_coordinate || "").trim();
+                        let gps = String(norm.gps_coordinate || norm.gps || "").trim();
                         let lat = "", lng = "";
                         if (gps.includes(",")) {
                             let p = gps.split(",");
@@ -275,16 +278,24 @@
 
                         // try parse reference_point if present (DMS or decimal)
                         let ref = dmsToDecimal(norm.reference_point || norm.reference || "");
+
+                        // email: support many header variants since CSV headers differ
+                        const emailField = norm.email || norm.email_id || norm.emailid || norm.mail || norm.mail_id || norm.mailid || norm.e_mail || norm.e_mail_id || "";
+
+                        // roll number: support multiple possible header names
+                        const rollField = norm.roll_no || norm.rollno || norm.roll_number || norm.roll || norm.student_roll || norm.reg_no || norm.regno || norm.registration_number || "";
+
                         return {
                             id: (norm.tree_id || norm.id || "").trim(),
                             name: (norm.tree_name || norm.name || "").trim(),
                             // keep as numbers where possible
                             lat: lat !== "" ? parseFloat(lat) : (norm.latitude ? parseFloat(norm.latitude) : ""),
                             lng: lng !== "" ? parseFloat(lng) : (norm.longitude ? parseFloat(norm.longitude) : ""),
-                            photo: norm.photo || norm.image || "",
-                            planted_year: norm.planted_year || "",
-                            maintained_by: norm.maintained_by || norm.department_name || "",
-                            email: norm.email || "",
+                            photo: norm.photo || norm.image || norm.picture || "",
+                            planted_year: norm.planted_year || norm.year || norm.planted || "",
+                            maintained_by: norm.maintained_by || norm.department_name || norm.department || "",
+                            email: emailField,
+                            roll_no: rollField,
                             refName: norm.department_name || norm.ref_name || norm.reference_name || "",
                             refLat: ref ? ref.lat : (norm.ref_lat ? parseFloat(norm.ref_lat) : ""),
                             refLng: ref ? ref.lng : (norm.ref_lng ? parseFloat(norm.ref_lng) : ""),
@@ -317,6 +328,7 @@
             const infoYear = document.getElementById("infoYear");
             const infoMaintainer = document.getElementById("infoMaintainer");
             const infoEmail = document.getElementById("infoEmail");
+            const infoRoll = document.getElementById("infoRoll");
 
             const refBlock = document.getElementById("refBlock");
             const distanceOnly = document.getElementById("distanceOnly");
@@ -344,7 +356,7 @@
 
             // helper escape to avoid accidental HTML injection if CSV contains special chars
             function escapeHtml(s) {
-                return String(s).replace(/[&<>"']/g, function (m) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]); });
+                return String(s).replace(/[&<>\"']/g, function (m) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '\"': '&quot;', "'": '&#39;' }[m]); });
             }
 
             // Main lookup: finds by id or name
@@ -367,6 +379,7 @@
                 infoYear.textContent = "—";
                 infoMaintainer.textContent = "—";
                 infoEmail.textContent = "—";
+                infoRoll.textContent = "—";
                 refBlock.style.display = "none";
             }
 
@@ -416,6 +429,7 @@
                 infoYear.textContent = rec.planted_year || "—";
                 infoMaintainer.textContent = rec.maintained_by || "—";
                 infoEmail.textContent = rec.email || "—";
+                infoRoll.textContent = rec.roll_no || "—";
 
                 // reference block: show distance preview and make it clickable
                 if (isFinite(rec.refLat) && isFinite(rec.refLng) && isFinite(rec.lat) && isFinite(rec.lng)) {
