@@ -299,7 +299,7 @@
 
             if (results.length === 0) { sugBox.style.display = "none"; return; }
 
-            sugBox.innerHTML = results.map(r => <div class="suggestion-item" data-id="${r.id}">${r.label}</div>).join("");
+            sugBox.innerHTML = results.map(r => `<div class="suggestion-item" data-id="${r.id}">${r.label}</div>`).join("");
             sugBox.style.display = "block";
         });
 
@@ -322,7 +322,7 @@
             // Map
             if (rec.lat && rec.lng) {
                 document.getElementById("mapFrame").src =
-                    https://www.google.com/maps?q=${rec.lat},${rec.lng}&z=18&output=embed;
+                    `https://www.google.com/maps?q=${rec.lat},${rec.lng}&z=18&output=embed`;
             }
 
             // Photo
@@ -349,14 +349,13 @@
 
             if (rec.refName && rec.refLat && rec.refLng) {
                 let d = haversine(rec.lat, rec.lng, rec.refLat, rec.refLng);
-                let dStr = d < 1000 ? ${ Math.round(d)
-            } m: ${ (d / 1000).toFixed(2) } km;
+                let dStr = d < 1000 ? `${Math.round(d)} m` : `${(d / 1000).toFixed(2)} km`;
 
-            dist.textContent = Located ${ dStr } from ${ rec.refName };
-            refBox.style.display = "block";
-        } else {
-            refBox.style.display = "none";
-        }
+                dist.textContent = `Located ${dStr} from ${rec.refName}`;
+                refBox.style.display = "block";
+            } else {
+                refBox.style.display = "none";
+            }
         }
 
         document.getElementById("locateBtn").onclick = lookup;
@@ -365,4 +364,5 @@
         });
     </script>
 </body>
+
 </html>
