@@ -95,7 +95,8 @@
         }
 
         .main {
-            display: flex;
+            /* HIDDEN by default until a successful unique-ID lookup */
+            display: none;
             gap: 20px;
             margin-top: 20px;
         }
@@ -319,6 +320,7 @@
 
             const refBlock = document.getElementById("refBlock");
             const distanceOnly = document.getElementById("distanceOnly");
+            const mainPanel = document.querySelector('.main');
 
             // suggestions filtering
             input.addEventListener("input", () => {
@@ -354,10 +356,37 @@
                     PLANTS.find(p => (String(p.name || "").toLowerCase().includes(q)));
             }
 
+            function clearDetails() {
+                // hide panel and reset fields
+                mainPanel.style.display = "none";
+                mapFrame.src = "";
+                plantPhoto.style.display = "none";
+                noPhoto.style.display = "none";
+                infoId.textContent = "—";
+                infoName.textContent = "—";
+                infoYear.textContent = "—";
+                infoMaintainer.textContent = "—";
+                infoEmail.textContent = "—";
+                refBlock.style.display = "none";
+            }
+
+            // ensure hidden by default on load
+            clearDetails();
+
             function lookup() {
                 let q = input.value;
                 let rec = findRecord(q);
-                if (!rec) { alert("Not found"); return; }
+                if (!rec) { alert("Not found"); clearDetails(); return; }
+
+                // Only show details if the user searched by the exact unique ID
+                const inputNormalized = String(input.value || "").toLowerCase().trim();
+                const recIdNormalized = String(rec.id || "").toLowerCase().trim();
+                if (!recIdNormalized || inputNormalized !== recIdNormalized) {
+                    // keep panels hidden if not searched by unique ID
+                    alert("Please search using the unique Tree ID to view details.");
+                    clearDetails();
+                    return;
+                }
 
                 // show map centered on plant if coords available, otherwise empty
                 if (isFinite(rec.lat) && isFinite(rec.lng)) {
@@ -419,6 +448,9 @@
                     delete refBlock.dataset.rlat;
                     delete refBlock.dataset.rlng;
                 }
+
+                // show main panel now that everything is populated
+                mainPanel.style.display = "flex";
             }
 
             // refBlock click: open Google Maps directions (new tab) and update embedded iframe
