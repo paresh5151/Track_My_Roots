@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Track My Roots</title>
+</head>
+
+<body>
+
+    <h2>Track My Roots 🌱</h2>
+
+    <input id="search" placeholder="Tree ID">
+    <button onclick="searchTree()">Search</button>
+
+    <div id="result"></div>
+
+    <hr>
+
+    <button onclick="openLogin()">Host</button>
+
+    <div id="login" style="display:none;">
+        <input id="email" placeholder="Email">
+        <input id="password" type="password" placeholder="Password">
+        <button onclick="login()">Login</button>
+    </div>
+
+    <div id="admin" style="display:none;">
+        <h3>Host Dashboard</h3>
+
+        <button onclick="addTree()">Add Tree</button>
+    </div>
+
+    <script>
+        let TREES = [];
+        let TOKEN = "";
+
+        fetch("/api/trees").then(r => r.json()).then(d => TREES = d);
+
+        function searchTree() {
+            const id = document.getElementById("search").value;
+            const t = TREES.find(x => x.treeId === id);
+            document.getElementById("result").innerText =
+                t ? JSON.stringify(t, null, 2) : "Not Found";
+        }
+
+        function openLogin() {
+            document.getElementById("login").style.display = "block";
+        }
+
+        async function login() {
+            const res = await fetch("/api/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    email: email.value,
+                    password: password.value
+                })
+            });
+            const d = await res.json();
+            TOKEN = d.token;
+            document.getElementById("admin").style.display = "block";
+        }
+
+        async function addTree() {
+            if (!confirm("Add tree?")) return;
+
+            await fetch("/api/trees", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": TOKEN
+                },
+                body: JSON.stringify({
+                    treeId: "T001",
+                    name: "Neem",
+                    lat: 17.12,
+                    lng: 82.12
+                })
+            });
+
+            alert("Tree Added");
+        }
+    </script>
+
+</body>
+
+</html>
