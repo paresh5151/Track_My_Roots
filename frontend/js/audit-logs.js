@@ -1,53 +1,42 @@
-const API_URL = "http://localhost:5000/api/auth/audit-logs";
-const token = localStorage.getItem("token");
+const API = "https://trackmyroots.onrender.com/api/audit";
+const table = document.getElementById("logTable");
 
-// Protect page
-if (!token) {
-  alert("Unauthorized. Please login.");
-  window.location.href = "login.html";
-}
-
-async function loadAuditLogs() {
+async function loadLogs() {
   try {
-    const res = await fetch(API_URL, {
+    const res = await fetch(API, {
       headers: {
-        "Authorization": token
+        Authorization: "Bearer " + localStorage.getItem("token")
       }
     });
 
     if (!res.ok) {
-      throw new Error("Access denied");
+      table.innerHTML = "<tr><td colspan='4'>Failed to load logs</td></tr>";
+      return;
     }
 
     const logs = await res.json();
-    const table = document.getElementById("logTable");
+
+    if (logs.length === 0) {
+      table.innerHTML = "<tr><td colspan='4'>No logs found</td></tr>";
+      return;
+    }
+
     table.innerHTML = "";
 
     logs.forEach(log => {
       const row = document.createElement("tr");
-
       row.innerHTML = `
-        <td>${formatAction(log.action)}</td>
-        <td>${log.performedBy?.username || "Unknown"} (${log.performedBy?.role})</td>
-        <td>${log.targetUser?.username || "Deleted User"}</td>
+        <td>${log.action}</td>
+        <td>${log.performedBy}</td>
+        <td>${log.target || "-"}</td>
         <td>${new Date(log.createdAt).toLocaleString()}</td>
       `;
-
       table.appendChild(row);
     });
 
   } catch (err) {
-    alert("You are not authorized to view audit logs.");
+    table.innerHTML = "<tr><td colspan='4'>Error loading logs</td></tr>";
   }
 }
 
-function formatAction(action) {
-  switch (action) {
-    case "UPDATE_PROFILE": return "Updated Profile";
-    case "CREATE_SUB_ADMIN": return "Created Sub-Admin";
-    case "DELETE_SUB_ADMIN": return "Deleted Sub-Admin";
-    default: return action;
-  }
-}
-
-loadAuditLogs();
+loadLogs();
