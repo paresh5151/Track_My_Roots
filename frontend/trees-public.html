@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Track My Roots</title>
+</head>
+<body>
+
+<h1>🌱 Our Trees</h1>
+<div id="trees"></div>
+
+<script>
+fetch("http://localhost:5000/api/trees")
+  .then(res => res.json())
+  .then(trees => {
+    document.getElementById("trees").innerHTML =
+      trees.map(t => `
+        <div>
+          <h3>${t.name}</h3>
+          <img src="${t.imageUrl}" width="200" />
+          <p>${t.description}</p>
+        </div>
+      `).join("");
+  });
+</script>
+
+</body>
+</html>

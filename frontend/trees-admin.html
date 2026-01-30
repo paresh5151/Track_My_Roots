@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Tree Management | Track My Roots</title>
+  <link rel="stylesheet" href="trees-admin.css" />
+</head>
+<body>
+
+<header>
+  <h1>🌳 Tree Management</h1>
+  <button onclick="logout()">Logout</button>
+</header>
+
+<section class="card">
+  <h2>Add / Edit Tree</h2>
+
+  <input id="treeId" hidden />
+  <input id="name" placeholder="Tree Name" />
+  <input id="location" placeholder="Location" />
+  <input id="year" placeholder="Planted Year" />
+  <input id="imageUrl" placeholder="Image URL" />
+  <textarea id="description" placeholder="Description"></textarea>
+
+  <button onclick="saveTree()">Save Tree</button>
+  <p id="msg"></p>
+</section>
+
+<section class="card">
+  <h2>Existing Trees</h2>
+  <ul id="treeList"></ul>
+</section>
+
+<script src="trees-admin.js"></script>
+</body>
+</html>
