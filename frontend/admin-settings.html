@@ -1,48 +1,20 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <title>Admin Settings | Track My Roots</title>
-  <link rel="stylesheet" href="admin-settings.css" />
+  <title>Admin Settings</title>
 </head>
 <body>
 
-  <!-- HEADER -->
-  <header>
-    <img src="logo.png" alt="Track My Roots Logo" class="logo" />
-    <h1>Admin Settings</h1>
-  </header>
+<script src="auth.js"></script>
 
-  <main>
+<h2>Change Password</h2>
 
-    <!-- UPDATE PROFILE -->
-    <section class="card">
-      <h2>Update Profile</h2>
+<input id="oldPass" placeholder="Current password" type="password">
+<input id="newPass" placeholder="New password" type="password">
+<button onclick="changePass()">Change</button>
 
-      <input type="password" id="currentPassword" placeholder="Current Password" />
-      <input type="text" id="newUsername" placeholder="New Username (optional)" />
-      <input type="password" id="newPassword" placeholder="New Password (optional)" />
+<p id="msg"></p>
 
-      <button onclick="updateProfile()">Update Profile</button>
-      <p id="profileMsg" class="msg"></p>
-    </section>
-
-    <!-- SUB ADMIN MANAGEMENT -->
-    <section class="card" id="subAdminSection">
-      <h2>Manage Sub-Admins</h2>
-
-      <input type="text" id="subUsername" placeholder="Sub-admin Username" />
-      <input type="password" id="subPassword" placeholder="Sub-admin Password" />
-
-      <button onclick="createSubAdmin()">Create Sub-Admin</button>
-      <p id="subAdminMsg" class="msg"></p>
-
-      <h3>Existing Sub-Admins</h3>
-      <ul id="subAdminList"></ul>
-    </section>
-
-  </main>
-
-  <script src="admin-settings.js"></script>
+<script src="admin-settings.js"></script>
 </body>
 </html>

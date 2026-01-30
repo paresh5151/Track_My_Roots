@@ -1,79 +1,52 @@
-const API = "http://localhost:5000/api/trees";
+const API = "https://trackmyroots.onrender.com/api/trees";
 const token = localStorage.getItem("token");
-
-if (!token) location.href = "login.html";
 
 async function loadTrees() {
   const res = await fetch(API);
   const trees = await res.json();
-
   const list = document.getElementById("treeList");
   list.innerHTML = "";
 
   trees.forEach(t => {
-    const li = document.createElement("li");
-    li.innerHTML = `
-      <b>${t.name}</b> - ${t.location}
-      <button onclick='editTree(${JSON.stringify(t)})'>Edit</button>
-      <button onclick='deleteTree("${t._id}")'>Delete</button>
-    `;
+    let li = document.createElement("li");
+    li.innerHTML = `${t.name} - ${t.location}`;
+
+    if (localStorage.getItem("role") === "main-admin") {
+      const btn = document.createElement("button");
+      btn.innerText = "Delete";
+      btn.onclick = () => deleteTree(t._id);
+      li.appendChild(btn);
+    }
+
     list.appendChild(li);
   });
 }
 
-async function saveTree() {
-  const id = treeId.value;
-
-  const data = {
-    name: name.value,
-    location: location.value,
-    plantedYear: year.value,
-    imageUrl: imageUrl.value,
-    description: description.value
-  };
-
-  const method = id ? "PUT" : "POST";
-  const url = id ? `${API}/${id}` : API;
-
-  const res = await fetch(url, {
-    method,
+async function addTree() {
+  await fetch(API, {
+    method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": token
+      Authorization: "Bearer " + token
     },
-    body: JSON.stringify(data)
+    body: JSON.stringify({
+      name: name.value,
+      location: location.value
+    })
   });
 
-  msg.innerText = (await res.json()).message || "Saved";
-  clearForm();
   loadTrees();
-}
-
-function editTree(t) {
-  treeId.value = t._id;
-  name.value = t.name;
-  location.value = t.location;
-  year.value = t.plantedYear;
-  imageUrl.value = t.imageUrl;
-  description.value = t.description;
 }
 
 async function deleteTree(id) {
+  if (!confirm("Delete tree?")) return;
+
   await fetch(`${API}/${id}`, {
     method: "DELETE",
-    headers: { "Authorization": token }
+    headers: { Authorization: "Bearer " + token }
   });
+
   loadTrees();
-}
-
-function clearForm() {
-  treeId.value = "";
-  name.value = location.value = year.value = imageUrl.value = description.value = "";
-}
-
-function logout() {
-  localStorage.clear();
-  location.href = "login.html";
 }
 
 loadTrees();
