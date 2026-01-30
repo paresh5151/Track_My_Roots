@@ -9,7 +9,7 @@
 
 <!-- ===== HEADER ===== -->
 <header class="top-header">
-  <img src="logo.png" class="logo">
+  <img src="images/logo.png" alt="JNTUK Logo" class="logo">
   <div>
     <h1>JNTUK Kakinada — Track My Roots</h1>
     <p>Digital Tree Tracking System</p>
@@ -18,14 +18,16 @@
 
 <!-- ===== SEARCH BAR ===== -->
 <div class="search-bar">
-  <input id="treeIdInput" placeholder="Enter Tree ID (eg: JNTUK0001)">
+  <input
+    id="treeIdInput"
+    placeholder="Enter Tree ID (e.g. JNTUK0001)">
   <button onclick="loadTree()">Locate</button>
 </div>
 
 <!-- ===== MAIN CONTENT ===== -->
 <div class="content">
 
-  <!-- LOCATION -->
+  <!-- LOCATION PREVIEW -->
   <div class="card">
     <h2>Location Preview</h2>
     <iframe
@@ -35,11 +37,11 @@
     </iframe>
   </div>
 
-  <!-- DETAILS -->
+  <!-- PLANT DETAILS -->
   <div class="card">
     <h2>Plant Details</h2>
 
-    <img id="treeImage" class="tree-image">
+    <img id="treeImage" class="tree-image" alt="Tree Image">
 
     <p><b>ID:</b> <span id="tid"></span></p>
     <p><b>Name:</b> <span id="tname"></span></p>
