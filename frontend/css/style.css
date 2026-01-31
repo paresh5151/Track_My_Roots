@@ -1,4 +1,71 @@
-body {
-  font-family: Arial;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+.hero {
+  height: 100vh;
+  background: url("../images/background.png") no-repeat center center/cover;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  background: rgba(255,255,255,0.9);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.logo img {
+  height: 45px;
+}
+
+.auth-links a {
+  margin-left: 20px;
+  text-decoration: none;
+  color: #0a7c6f;
+  font-weight: bold;
+}
+
+.hero-content {
   text-align: center;
+  margin-top: 120px;
+}
+
+.hero-content h1 {
+  color: #003333;
+  margin-bottom: 30px;
+}
+
+.search-box {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.search-box input {
+  width: 420px;
+  padding: 14px;
+  font-size: 16px;
+  border-radius: 8px;
+  border: none;
+}
+
+.search-box button {
+  padding: 14px 24px;
+  background: #0a7c6f;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
 }

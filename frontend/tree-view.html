@@ -1,17 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Tree View</title>
-  <link rel="stylesheet" href="css/tree-view.css">
+  <title>Tree Details</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<h2>Tree List</h2>
-<button onclick="logout()">Logout</button>
+<header class="top-bar">
+  <div class="logo">
+    <img src="images/logo.png">
+    <span>Track My Roots</span>
+  </div>
+</header>
 
-<div id="treeList"></div>
+<div style="display:flex; padding:40px; gap:30px;">
 
-<script src="js/auth.js"></script>
+  <div style="flex:1">
+    <h2>Location Preview</h2>
+    <iframe
+      id="map"
+      width="100%"
+      height="400"
+      style="border:0"
+      loading="lazy">
+    </iframe>
+  </div>
+
+  <div style="flex:1">
+    <h2>Plant Details</h2>
+    <div id="treeDetails"></div>
+  </div>
+
+</div>
+
 <script src="js/tree-view.js"></script>
 </body>
 </html>

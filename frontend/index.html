@@ -4,12 +4,29 @@
   <title>Track My Roots</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body class="hero">
 
-<h1>🌳 Track My Roots</h1>
+<header class="top-bar">
+  <div class="logo">
+    <img src="images/logo.png" alt="Logo">
+    <span>JNTUK Kakinada — Track My Roots</span>
+  </div>
 
-<a href="login.html">Login</a> |
-<a href="tree-view.html">View Trees</a>
+  <div class="auth-links">
+    <a href="login.html">Admin Login</a>
+    <a href="login.html">Sub-Admin Login</a>
+  </div>
+</header>
 
+<div class="hero-content">
+  <h1>Digital Tree Tracking System</h1>
+
+  <div class="search-box">
+    <input id="searchInput" placeholder="Search by Tree ID or Name">
+    <button onclick="searchTree()">Locate</button>
+  </div>
+</div>
+
+<script src="js/index.js"></script>
 </body>
 </html>
