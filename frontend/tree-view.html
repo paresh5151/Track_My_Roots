@@ -8,29 +8,57 @@
 
 <header class="top-bar">
   <h2>🌳 Track My Roots – Dashboard</h2>
-  <button onclick="logout()">Logout</button>
+  <button onclick="logout()">🚪 Logout</button>
 </header>
 
 <div style="padding:20px">
 
-  <!-- Add Tree button (Admin & Sub Admin) -->
-  <button id="addTreeBtn" style="display:none"
-          onclick="window.location.href='add-tree.html'">
-    ➕ Add Tree
-  </button>
+  <!-- ACTION BUTTONS -->
+  <div style="margin-bottom:20px; display:flex; gap:10px; flex-wrap:wrap">
 
-  <h3>All Trees</h3>
+    <button id="addTreeBtn" style="display:none"
+      onclick="window.location.href='add-tree.html'">
+      ➕ Add Tree
+    </button>
+
+    <button id="editTreeBtn" style="display:none"
+      onclick="enableEditMode()">
+      ✏️ Edit Tree
+    </button>
+
+    <button id="deleteTreeBtn" style="display:none"
+      onclick="enableDeleteMode()">
+      🗑️ Delete Tree
+    </button>
+
+    <button id="createSubAdminBtn" style="display:none"
+      onclick="window.location.href='create-subadmin.html'">
+      👤 Create Sub Admin
+    </button>
+
+  </div>
+
+  <h3>🌲 Trees List</h3>
   <div id="treeList"></div>
 
 </div>
 
 <script src="js/auth.js"></script>
 <script src="js/tree-view.js"></script>
+
 <script>
-  // show Add Tree for admin & subadmin
   const role = localStorage.getItem("role");
-  if (role === "admin" || role === "subadmin") {
-    document.getElementById("addTreeBtn").style.display = "inline-block";
+
+  if (role === "admin") {
+    addTreeBtn.style.display = "inline-block";
+    editTreeBtn.style.display = "inline-block";
+    deleteTreeBtn.style.display = "inline-block";
+    createSubAdminBtn.style.display = "inline-block";
+  }
+
+  if (role === "subadmin") {
+    addTreeBtn.style.display = "inline-block";
+    editTreeBtn.style.display = "inline-block";
   }
 </script>
 
