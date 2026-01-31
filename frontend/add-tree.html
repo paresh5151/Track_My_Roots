@@ -1,19 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Add / Edit Tree</title>
+  <title>Add Tree</title>
   <link rel="stylesheet" href="css/form.css">
 </head>
 <body class="hero">
 
 <header class="top-bar">
-  <h2>🌳 Track My Roots – Add / Edit Tree</h2>
+  <h2>🌳 Track My Roots – Add Tree</h2>
 </header>
 
 <div class="form-container">
   <form id="treeForm">
 
-    <input required id="treeId" placeholder="Tree ID (JNTUK0001)">
     <input required id="treeName" placeholder="Tree Name">
     <input required id="scientificName" placeholder="Scientific Name">
     <input required id="plantedYear" type="number" placeholder="Planted Year">
@@ -21,7 +20,8 @@
     <input required id="rollNo" placeholder="Roll Number">
     <input required id="email" type="email" placeholder="Email">
 
-    <input required id="imageUrl" placeholder="Tree Image URL">
+    <!-- LIVE CAMERA -->
+    <input required type="file" id="image" accept="image/*" capture="environment">
 
     <div class="gps">
       <button type="button" onclick="getLocation()">📍 Detect Live Location</button>
