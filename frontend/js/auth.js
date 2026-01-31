@@ -1,14 +1,14 @@
-if (!localStorage.getItem("token")) {
-  alert("Please login");
-  window.location.href = "login.html";
+const API = "https://track-my-roots-api.onrender.com";
+
+function isLoggedIn() {
+  return localStorage.getItem("token") !== null;
+}
+
+function getToken() {
+  return localStorage.getItem("token");
 }
 
 function logout() {
   localStorage.clear();
   window.location.href = "login.html";
-}
-
-if (localStorage.getItem("role") === "sub-admin") {
-  const audit = document.getElementById("auditNav");
-  if (audit) audit.style.display = "none";
 }

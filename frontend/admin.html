@@ -1,66 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Admin Dashboard | Track My Roots</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Admin</title>
+  <link rel="stylesheet" href="css/trees-admin.css">
 </head>
 <body>
 
-<!-- Auth check -->
-<script src="auth.js"></script>
+<h2>Add Tree</h2>
 
-<!-- ===== NAVBAR ===== -->
-<nav class="navbar">
-  <a href="index.html">Dashboard</a>
-  <a href="trees-admin.html">Trees</a>
-  <a href="audit-logs.html" id="auditNav">Audit Logs</a>
-  <a href="admin-settings.html">Admin Settings</a>
-  <a href="#" onclick="logout()">Logout</a>
-</nav>
+<input id="treeName" placeholder="Tree Name"><br><br>
+<input id="location" placeholder="Location"><br><br>
+<input id="age" type="number" placeholder="Age"><br><br>
 
-<!-- ===== PAGE CONTENT ===== -->
-<div class="container">
+<button onclick="addTree()">Add Tree</button>
 
-  <h1>Admin Dashboard</h1>
-  <p class="subtitle">
-    Manage trees, administrators, and system activity
-  </p>
-
-  <div style="margin-top:30px; display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px;">
-
-    <!-- Trees -->
-    <div class="card">
-      <h3>🌳 Tree Management</h3>
-      <p>Add, update, and manage tree records</p>
-      <a href="trees-admin.html">Go →</a>
-    </div>
-
-    <!-- Audit Logs -->
-    <div class="card" id="auditCard">
-      <h3>📜 Audit Logs</h3>
-      <p>Track admin and sub-admin actions</p>
-      <a href="audit-logs.html">View →</a>
-    </div>
-
-    <!-- Settings -->
-    <div class="card">
-      <h3>⚙️ Admin Settings</h3>
-      <p>Change password and manage sub-admins</p>
-      <a href="admin-settings.html">Open →</a>
-    </div>
-
-  </div>
-
-</div>
-
-<script>
-  /* Hide audit card for sub-admin */
-  if (localStorage.getItem("role") === "sub-admin") {
-    const audit = document.getElementById("auditCard");
-    if (audit) audit.style.display = "none";
-  }
-</script>
-
+<script src="js/trees-admin.js"></script>
 </body>
 </html>

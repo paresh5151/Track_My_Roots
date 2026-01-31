@@ -1,58 +1,24 @@
-const API = "https://trackmyroots.onrender.com/api/trees";
-const token = localStorage.getItem("token");
-
-let latitude = null;
-let longitude = null;
-
-/* ===== LIVE LOCATION ===== */
-function detectLocation() {
-  navigator.geolocation.getCurrentPosition(
-    pos => {
-      latitude = pos.coords.latitude;
-      longitude = pos.coords.longitude;
-      document.getElementById("locStatus").innerText =
-        `Location detected (${latitude}, ${longitude})`;
-    },
-    () => alert("Location access denied")
-  );
+if (localStorage.getItem("role") !== "admin") {
+  alert("Admin access only");
+  window.location.href = "index.html";
 }
 
-/* ===== ADD TREE ===== */
-async function addTree() {
-  if (!latitude || !longitude) {
-    alert("Please detect location first");
-    return;
-  }
+function addTree() {
+  const treeName = document.getElementById("treeName").value;
+  const location = document.getElementById("location").value;
+  const age = document.getElementById("age").value;
 
-  if (!confirm("Are you sure you want to add this tree?")) return;
-
-  const res = await fetch(API, {
+  fetch("https://track-my-roots-api.onrender.com/api/trees", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: "Bearer " + token
+      Authorization: "Bearer " + localStorage.getItem("token")
     },
-    body: JSON.stringify({
-      treeId: treeId.value,
-      name: name.value,
-      plantedYear: year.value,
-      maintainedBy: maintainedBy.value,
-      rollNo: rollNo.value,
-      email: email.value,
-      latitude,
-      longitude,
-      imageUrl: imageUrl.value,
-      note: note.value
-    })
+    body: JSON.stringify({ treeName, location, age })
+  })
+  .then(res => res.json())
+  .then(() => {
+    alert("Tree added successfully");
+    window.location.reload();
   });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    alert(data.error);
-    return;
-  }
-
-  alert("Tree added successfully");
-  location.reload();
 }
