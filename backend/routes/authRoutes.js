@@ -5,38 +5,31 @@ import User from "../models/User.js";
 
 const router = express.Router();
 
-/* =========================
-   REGISTER (TEMP – ADMIN CREATION)
-========================= */
 router.post("/register", async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
-    // check if user already exists
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
+    const existing = await User.findOne({ email });
+    if (existing) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashed = await bcrypt.hash(password, 10);
 
     await User.create({
       name,
       email,
-      password: hashedPassword,
+      password: hashed,
       role
     });
 
     res.json({ message: "User created" });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Registration failed" });
+    res.status(500).json({ message: "Register failed" });
   }
 });
 
-/* =========================
-   LOGIN
-========================= */
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -46,8 +39,8 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
@@ -57,17 +50,11 @@ router.post("/login", async (req, res) => {
       { expiresIn: "1d" }
     );
 
-    res.json({
-      token,
-      role: user.role
-    });
+    res.json({ token, role: user.role });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Login failed" });
   }
 });
 
-/* =========================
-   DEFAULT EXPORT (IMPORTANT)
-========================= */
 export default router;
