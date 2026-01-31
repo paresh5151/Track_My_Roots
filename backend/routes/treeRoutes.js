@@ -1,64 +1,28 @@
-const express = require("express");
-const Tree = require("../models/Tree");
-const auth = require("../middleware/auth");
-const role = require("../middleware/role");
+import express from "express";
+import Tree from "../models/Tree.js";
+import AuditLog from "../models/AuditLog.js";
+import { protect } from "../middleware/auth.js";
+import { adminOnly } from "../middleware/role.js";
 
 const router = express.Router();
 
-// Public: get all trees
-router.get("/", async (req, res) => {
-  try {
-    const trees = await Tree.find();
-    res.json(trees);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+router.get("/", protect, async (req, res) => {
+  const trees = await Tree.find();
+  res.json(trees);
 });
 
-// Add tree (main admin + sub admin)
-router.post(
-  "/",
-  auth,
-  role(["main-admin", "sub-admin"]),
-  async (req, res) => {
-    try {
-      const tree = new Tree(req.body);
-      await tree.save();
-      res.json(tree);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  }
-);
+router.post("/", protect, adminOnly, async (req, res) => {
+  const tree = await Tree.create({
+    ...req.body,
+    createdBy: req.user.id
+  });
 
-// Update tree (main admin + sub admin)
-router.put(
-  "/:id",
-  auth,
-  role(["main-admin", "sub-admin"]),
-  async (req, res) => {
-    try {
-      await Tree.findByIdAndUpdate(req.params.id, req.body);
-      res.json({ message: "Tree updated" });
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  }
-);
+  await AuditLog.create({
+    action: "Tree Added",
+    user: req.user.id
+  });
 
-// Delete tree (ONLY main admin)
-router.delete(
-  "/:id",
-  auth,
-  role(["main-admin"]),
-  async (req, res) => {
-    try {
-      await Tree.findByIdAndDelete(req.params.id);
-      res.json({ message: "Tree deleted" });
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  }
-);
+  res.json(tree);
+});
 
-module.exports = router;
+export default router;

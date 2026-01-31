@@ -1,5 +1,3 @@
-module.exports = function isStrongPassword(password) {
-  const regex =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/;
-  return regex.test(password);
+export const validatePassword = (password) => {
+  return password.length >= 6;
 };

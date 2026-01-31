@@ -1,60 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>Track My Roots | Tree Details</title>
-  <link rel="stylesheet" href="tree-view.css">
+  <title>Trees</title>
 </head>
 <body>
+  <h2>Tree List</h2>
 
-<!-- ===== HEADER ===== -->
-<header class="top-header">
-  <img src="images/logo.png" alt="JNTUK Logo" class="logo">
-  <div>
-    <h1>JNTUK Kakinada — Track My Roots</h1>
-    <p>Digital Tree Tracking System</p>
-  </div>
-</header>
+  <ul id="trees"></ul>
 
-<!-- ===== SEARCH BAR ===== -->
-<div class="search-bar">
-  <input
-    id="treeIdInput"
-    placeholder="Enter Tree ID (e.g. JNTUK0001)">
-  <button onclick="loadTree()">Locate</button>
-</div>
-
-<!-- ===== MAIN CONTENT ===== -->
-<div class="content">
-
-  <!-- LOCATION PREVIEW -->
-  <div class="card">
-    <h2>Location Preview</h2>
-    <iframe
-      id="mapFrame"
-      loading="lazy"
-      referrerpolicy="no-referrer-when-downgrade">
-    </iframe>
-  </div>
-
-  <!-- PLANT DETAILS -->
-  <div class="card">
-    <h2>Plant Details</h2>
-
-    <img id="treeImage" class="tree-image" alt="Tree Image">
-
-    <p><b>ID:</b> <span id="tid"></span></p>
-    <p><b>Name:</b> <span id="tname"></span></p>
-    <p><b>Planted Year:</b> <span id="tyear"></span></p>
-    <p><b>Maintained by:</b> <span id="tmaint"></span></p>
-    <p><b>Roll No:</b> <span id="troll"></span></p>
-    <p><b>Email:</b> <span id="temail"></span></p>
-
-    <div class="note" id="tdistance"></div>
-  </div>
-
-</div>
-
-<script src="tree-view.js"></script>
+  <script src="js/tree-view.js"></script>
 </body>
 </html>

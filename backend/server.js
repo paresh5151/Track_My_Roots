@@ -1,34 +1,25 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
-require("dotenv").config();
+import express from "express";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+import cors from "cors";
 
+import authRoutes from "./routes/authRoutes.js";
+import treeRoutes from "./routes/treeRoutes.js";
+
+dotenv.config();
 const app = express();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// ===== FORCE LOCAL MONGODB CONNECTION =====
-mongoose
-  .connect("mongodb://127.0.0.1:27017/trackmyroots")
+app.use("/api/auth", authRoutes);
+app.use("/api/trees", treeRoutes);
+
+mongoose.connect(process.env.MONGO_URI)
   .then(() => {
-    console.log("MongoDB connected");
+    console.log("✅ MongoDB connected");
+    app.listen(process.env.PORT, () =>
+      console.log(`🚀 Server running on port ${process.env.PORT}`)
+    );
   })
-  .catch((err) => {
-    console.error("MongoDB error:", err);
-  });
-
-// Routes
-app.get("/", (req, res) => {
-  res.send("Track My Roots backend running");
-});
-
-app.use("/api/trees", require("./routes/treeRoutes"));
-app.use("/api/auth", require("./routes/authRoutes"));
-
-// Server start
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Backend running on port ${PORT}`);
-});
+  .catch(err => console.error(err));

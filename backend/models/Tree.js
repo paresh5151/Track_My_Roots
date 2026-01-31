@@ -1,18 +1,11 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
-const TreeSchema = new mongoose.Schema(
-  {
-    name: {
-      type: String,
-      required: true
-    },
-    plantedYear: Number,
-    location: String,
-    description: String,
-    imageUrl: String,
-    createdBy: String
-  },
-  { timestamps: true }
-);
+const treeSchema = new mongoose.Schema({
+  treeName: String,
+  location: String,
+  age: Number,
+  qrCode: String,
+  createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" }
+}, { timestamps: true });
 
-module.exports = mongoose.model("Tree", TreeSchema);
+export default mongoose.model("Tree", treeSchema);

@@ -1,32 +1,15 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Tree Management | Track My Roots</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
+<h2>Add Tree</h2>
 
-<script src="auth.js"></script>
+<input id="treeId" placeholder="Tree ID">
+<input id="name" placeholder="Tree Name">
+<input id="year" placeholder="Planted Year">
+<input id="maintainedBy" placeholder="Maintained By">
+<input id="rollNo" placeholder="Roll No">
+<input id="email" placeholder="Email">
+<input id="imageUrl" placeholder="Image URL">
+<textarea id="note" placeholder="Location note"></textarea>
 
-<nav class="navbar">
-  <a href="index.html">Dashboard</a>
-  <a href="trees-admin.html">Trees</a>
-  <a href="audit-logs.html" id="auditNav">Audit Logs</a>
-  <a href="admin-settings.html">Admin Settings</a>
-  <a href="#" onclick="logout()">Logout</a>
-</nav>
+<button onclick="detectLocation()">Detect Live Location</button>
+<p id="locStatus"></p>
 
-<div class="container">
-  <h1>Tree Management</h1>
-
-  <input id="name" placeholder="Tree Name">
-  <input id="location" placeholder="Location">
-  <button onclick="addTree()">Add Tree</button>
-
-  <ul id="treeList"></ul>
-</div>
-
-<script src="trees-admin.js"></script>
-</body>
-</html>
+<button onclick="addTree()">Add Tree</button>

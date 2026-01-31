@@ -1,23 +1,20 @@
 async function login() {
-  const username = document.getElementById("username").value;
+  const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
-  const res = await fetch("https://trackmyroots.onrender.com/api/auth/login", {
+  const res = await fetch("https://YOUR-BACKEND.onrender.com/api/auth/login", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ username, password })
+    body: JSON.stringify({ email, password })
   });
 
   const data = await res.json();
 
-  if (!res.ok) {
-    document.getElementById("msg").innerText = data.error;
-    return;
+  if (data.token) {
+    localStorage.setItem("token", data.token);
+    alert("Login success");
+    window.location.href = "tree-view.html";
+  } else {
+    alert(data.message);
   }
-
-  localStorage.setItem("token", data.token);
-  localStorage.setItem("role", data.role);
-  localStorage.setItem("username", data.username);
-
-  window.location.href = "index.html";
 }
