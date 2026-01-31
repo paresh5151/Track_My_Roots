@@ -3,30 +3,48 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
 
+// Routes
 import authRoutes from "./routes/authRoutes.js";
 import treeRoutes from "./routes/treeRoutes.js";
+// (Optional – only if you created audit routes)
+// import auditRoutes from "./routes/auditRoutes.js";
 
 dotenv.config();
 
 const app = express();
 
-// Middleware
-app.use(cors());
+/* =========================
+   MIDDLEWARE
+========================= */
 app.use(express.json());
 
-// Routes
+app.use(cors({
+  origin: [
+    "https://track-my-roots.onrender.com"
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
+/* =========================
+   ROUTES
+========================= */
 app.use("/api/auth", authRoutes);
 app.use("/api/trees", treeRoutes);
+// app.use("/api/audit", auditRoutes);
 
-// Test route (IMPORTANT)
+/* =========================
+   TEST ROUTE
+========================= */
 app.get("/", (req, res) => {
   res.send("Track My Roots Backend Running ✅");
 });
 
-// Port (Render-safe)
+/* =========================
+   SERVER + DATABASE
+========================= */
 const PORT = process.env.PORT || 5000;
 
-// MongoDB connection
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
@@ -38,5 +56,5 @@ mongoose
   })
   .catch((err) => {
     console.error("❌ MongoDB connection error:", err.message);
-    process.exit(1); // force crash if DB fails
+    process.exit(1);
   });
