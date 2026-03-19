@@ -16,7 +16,15 @@ const storage = multer.diskStorage({
   }
 });
 
-const upload = multer({ storage });
+const upload = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith("image/")) {
+      return cb(new Error("Only image files are allowed"), false);
+    }
+    cb(null, true);
+  }
+});
 
 /* =========================
    ADD TREE (Admin + SubAdmin)
@@ -39,9 +47,23 @@ router.post(
         longitude
       } = req.body;
 
-      // Auto-generate Tree ID
-      const count = await Tree.countDocuments();
-      const treeId = `JNTUK-TREE-${String(count + 1).padStart(4, "0")}`;
+      // ✅ Basic Validation
+      if (
+        !treeName ||
+        !scientificName ||
+        !plantedYear ||
+        !maintainedBy ||
+        !rollNo ||
+        !email ||
+        !latitude ||
+        !longitude ||
+        !req.file
+      ) {
+        return res.status(400).json({ message: "All fields are required" });
+      }
+
+      // ✅ Safe Tree ID
+      const treeId = `JNTUK-TREE-${Date.now()}`;
 
       const tree = await Tree.create({
         treeId,
@@ -53,22 +75,22 @@ router.post(
         email,
         imagePath: req.file.path,
         location: {
-          latitude,
-          longitude
+          latitude: parseFloat(latitude),
+          longitude: parseFloat(longitude)
         },
-        createdByRole: req.user.role
+        createdBy: req.user.id
       });
 
-      res.json(tree);
+      res.status(201).json(tree);
     } catch (err) {
-      // Duplicate location error
+      // Duplicate error
       if (err.code === 11000) {
         return res.status(400).json({
-          message: "A tree already exists at this location"
+          message: "Duplicate entry (possibly same location)"
         });
       }
 
-      res.status(400).json({ message: err.message });
+      res.status(500).json({ message: err.message });
     }
   }
 );
@@ -77,16 +99,75 @@ router.post(
    GET ALL TREES (PUBLIC)
 ========================= */
 router.get("/", async (req, res) => {
-  const trees = await Tree.find().sort({ createdAt: -1 });
-  res.json(trees);
+  try {
+    const trees = await Tree.find({ isDeleted: false }).sort({
+      createdAt: -1
+    });
+    res.json(trees);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 /* =========================
    GET SINGLE TREE
 ========================= */
 router.get("/:id", async (req, res) => {
-  const tree = await Tree.findById(req.params.id);
-  res.json(tree);
+  try {
+    const tree = await Tree.findById(req.params.id);
+
+    if (!tree || tree.isDeleted) {
+      return res.status(404).json({ message: "Tree not found" });
+    }
+
+    res.json(tree);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
+
+/* =========================
+   SEARCH TREES
+========================= */
+router.get("/search", async (req, res) => {
+  try {
+    const { q } = req.query;
+
+    const trees = await Tree.find({
+      $text: { $search: q },
+      isDeleted: false
+    });
+
+    res.json(trees);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+/* =========================
+   SOFT DELETE TREE
+========================= */
+router.delete(
+  "/:id",
+  verifyToken,
+  allowRoles("admin", "subadmin"),
+  async (req, res) => {
+    try {
+      const tree = await Tree.findByIdAndUpdate(
+        req.params.id,
+        { isDeleted: true },
+        { new: true }
+      );
+
+      if (!tree) {
+        return res.status(404).json({ message: "Tree not found" });
+      }
+
+      res.json({ message: "Tree deleted successfully" });
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
+  }
+);
 
 export default router;
