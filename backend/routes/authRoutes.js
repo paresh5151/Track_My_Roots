@@ -5,9 +5,31 @@ import User from "../models/User.js";
 
 const router = express.Router();
 
+/* =========================
+   REGISTER
+========================= */
 router.post("/register", async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    let { name, email, password, role } = req.body;
+
+    // Basic validation
+    if (!name || !email || !password || !role) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    // Normalize email
+    email = email.toLowerCase().trim();
+
+    // Password strength check
+    if (password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters" });
+    }
+
+    // Restrict role creation
+    const allowedRoles = ["admin", "subadmin"];
+    if (!allowedRoles.includes(role.toLowerCase())) {
+      return res.status(400).json({ message: "Invalid role" });
+    }
 
     const existing = await User.findOne({ email });
     if (existing) {
@@ -17,22 +39,32 @@ router.post("/register", async (req, res) => {
     const hashed = await bcrypt.hash(password, 10);
 
     await User.create({
-      name,
+      name: name.trim(),
       email,
       password: hashed,
-      role
+      role: role.toLowerCase()
     });
 
-    res.json({ message: "User created" });
+    res.status(201).json({ message: "User created successfully" });
   } catch (err) {
-    console.error(err);
+    console.error("Register Error:", err.message);
     res.status(500).json({ message: "Register failed" });
   }
 });
 
+/* =========================
+   LOGIN
+========================= */
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
+
+    // Validation
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+
+    email = email.toLowerCase().trim();
 
     const user = await User.findOne({ email });
     if (!user) {
@@ -50,9 +82,13 @@ router.post("/login", async (req, res) => {
       { expiresIn: "1d" }
     );
 
-    res.json({ token, role: user.role });
+    res.json({
+      token,
+      role: user.role,
+      userId: user._id
+    });
   } catch (err) {
-    console.error(err);
+    console.error("Login Error:", err.message);
     res.status(500).json({ message: "Login failed" });
   }
 });
