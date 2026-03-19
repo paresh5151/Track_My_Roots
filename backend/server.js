@@ -2,6 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cors from "cors";
+import rateLimit from "express-rate-limit";
 
 // Routes
 import authRoutes from "./routes/authRoutes.js";
@@ -18,6 +19,9 @@ const app = express();
 ========================= */
 app.use(express.json());
 
+// Serve uploaded images
+app.use("/uploads", express.static("uploads"));
+
 app.use(cors({
   origin: [
     "https://track-my-roots.onrender.com",
@@ -26,6 +30,14 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"]
 }));
+
+// Rate limiting (basic protection)
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 mins
+  max: 100
+});
+
+app.use(limiter);
 
 /* =========================
    ROUTES
@@ -39,6 +51,14 @@ app.use("/api/trees", treeRoutes);
 ========================= */
 app.get("/", (req, res) => {
   res.send("Track My Roots Backend Running ✅");
+});
+
+/* =========================
+   GLOBAL ERROR HANDLER
+========================= */
+app.use((err, req, res, next) => {
+  console.error("🔥 Error:", err.message);
+  res.status(500).json({ message: err.message || "Internal Server Error" });
 });
 
 /* =========================
