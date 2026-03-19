@@ -50,12 +50,13 @@ const treeSchema = new mongoose.Schema(
     },
 
     location: {
-      latitude: {
-        type: Number,
-        required: true
+      type: {
+        type: String,
+        enum: ["Point"],
+        default: "Point"
       },
-      longitude: {
-        type: Number,
+      coordinates: {
+        type: [Number], // [longitude, latitude]
         required: true
       }
     },
@@ -77,6 +78,6 @@ const treeSchema = new mongoose.Schema(
 treeSchema.index({ treeName: "text", scientificName: "text" });
 
 /* 📍 Location Index (NOT unique to avoid GPS issues) */
-treeSchema.index({ "location.latitude": 1, "location.longitude": 1 });
+treeSchema.index({ location: "2dsphere" });
 
 export default mongoose.model("Tree", treeSchema);
