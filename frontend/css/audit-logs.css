@@ -1,31 +1,68 @@
 /* ===== RESET ===== */
-body {
+* {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
   font-family: Arial, sans-serif;
+}
+
+/* ===== LAYOUT ===== */
+body {
+  display: flex;
   background-color: #f4f6f8;
-  color: #000;
+  color: #333;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: 220px;
+  height: 100vh;
+  background: #1b5e20;
+  color: white;
+  padding: 20px;
+  position: fixed;
+}
+
+.sidebar h2 {
+  margin-bottom: 20px;
+}
+
+.sidebar a {
+  display: block;
+  color: white;
+  text-decoration: none;
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  transition: 0.3s;
+}
+
+.sidebar a:hover {
+  background: #2e7d32;
+}
+
+/* ===== MAIN CONTENT ===== */
+.main {
+  margin-left: 240px;
+  padding: 20px;
+  width: 100%;
 }
 
 /* ===== HEADER ===== */
-header {
-  background-color: #1b5e20;
-  color: white;
-  padding: 20px;
-  text-align: center;
+.header {
+  background: white;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
-header h1 {
-  margin: 5px 0;
-}
-
-/* ===== MAIN ===== */
-main {
-  max-width: 1100px;
-  margin: 30px auto;
+/* ===== TABLE CARD ===== */
+.card {
   background: white;
   padding: 20px;
-  border-radius: 6px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
 /* ===== TABLE ===== */
@@ -41,18 +78,63 @@ thead {
 
 th, td {
   padding: 12px;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid #eee;
   text-align: left;
 }
 
 tr:hover {
-  background-color: #f1f1f1;
+  background-color: #f9f9f9;
 }
 
-th {
-  font-size: 14px;
+/* ===== ROW COLORS ===== */
+tr.create-row {
+  background-color: #e8f5e9;
 }
 
-td {
-  font-size: 13px;
+tr.delete-row {
+  background-color: #ffebee;
+}
+
+tr.login-row {
+  background-color: #e3f2fd;
+}
+
+/* ===== BADGES ===== */
+.badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.badge.create {
+  background-color: #4caf50;
+  color: white;
+}
+
+.badge.delete {
+  background-color: #f44336;
+  color: white;
+}
+
+.badge.login {
+  background-color: #2196f3;
+  color: white;
+}
+
+/* ===== SMALL TEXT ===== */
+.muted {
+  color: #888;
+  font-size: 12px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+
+  .main {
+    margin-left: 0;
+  }
 }

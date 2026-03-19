@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Track My Roots</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -14,7 +16,7 @@
 
   <div class="auth-links">
     <a href="login.html">Admin Login</a>
-    <a href="login.html">Sub-Admin Login</a>
+    <a href="login.html?role=subadmin">Sub-Admin Login</a>
   </div>
 </header>
 
@@ -22,11 +24,14 @@
   <h1>Digital Tree Tracking System</h1>
 
   <div class="search-box">
-    <input id="searchInput" placeholder="Search by Tree ID or Name">
+    <input id="searchInput" placeholder="Search by Tree ID or Name" onkeydown="if(event.key==='Enter'){searchTree()}">
     <button onclick="searchTree()">Locate</button>
+  </div>
+  <div style="margin-top:15px;">
+    <a href="trees.html">🌍 View All Trees on Map</a>
   </div>
 </div>
 
-<script src="js/index.js"></script>
+<script src="js/index.js" defer></script>
 </body>
 </html>

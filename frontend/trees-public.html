@@ -4,6 +4,10 @@
   <meta charset="UTF-8">
   <title>Public Trees | Track My Roots</title>
   <link rel="stylesheet" href="style.css">
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
 </head>
 <body>
 
@@ -15,18 +19,58 @@
 <div class="container">
   <h1>Tracked Trees 🌱</h1>
   <ul id="publicTrees"></ul>
+  <h2>🗺️ Tree Map</h2>
+  <div id="map" style="height:400px; margin-top:10px;"></div>
 </div>
 
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-fetch("https://trackmyroots.onrender.com/api/trees")
-  .then(r => r.json())
+const list = document.getElementById("publicTrees");
+
+// Initialize map (default center Vijayawada)
+const map = L.map("map").setView([16.5062, 80.6480], 14);
+
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: "© OpenStreetMap"
+}).addTo(map);
+
+fetch("https://track-my-roots-api.onrender.com/api/trees")
+  .then(res => res.json())
   .then(data => {
-    const list = document.getElementById("publicTrees");
+    if (!data || data.length === 0) {
+      list.innerHTML = "<li>No trees found</li>";
+      return;
+    }
+
     data.forEach(t => {
       const li = document.createElement("li");
-      li.innerText = `${t.name} — ${t.location}`;
+
+      const lat = t.location?.coordinates?.[1];
+      const lng = t.location?.coordinates?.[0];
+
+      li.innerHTML = `
+        <strong>${t.treeName}</strong><br>
+        🌿 ${t.scientificName}<br>
+        📍 ${lat && lng ? `${lat}, ${lng}` : "Location not available"}<br>
+        👨‍🌾 Maintained by: ${t.maintainedBy}
+      `;
+
       list.appendChild(li);
+
+      // Add marker to map
+      if (lat && lng) {
+        L.marker([lat, lng])
+          .addTo(map)
+          .bindPopup(`
+            <strong>${t.treeName}</strong><br>
+            ${t.scientificName}
+          `);
+      }
     });
+  })
+  .catch(err => {
+    console.error(err);
+    list.innerHTML = "<li>Error loading trees</li>";
   });
 </script>
 

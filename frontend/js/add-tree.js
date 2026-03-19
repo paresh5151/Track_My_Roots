@@ -8,6 +8,8 @@ let longitude = null;
    GPS DETECTION
 ========================= */
 function getLocation() {
+  const status = document.getElementById("locationStatus");
+
   if (!navigator.geolocation) {
     alert("Geolocation not supported");
     return;
@@ -18,11 +20,11 @@ function getLocation() {
       latitude = pos.coords.latitude;
       longitude = pos.coords.longitude;
 
-      document.getElementById("locationStatus").innerText =
+      status.innerText =
         `📍 Location detected (${latitude.toFixed(5)}, ${longitude.toFixed(5)})`;
     },
     () => {
-      alert("Location permission denied");
+      status.innerText = "❌ Location permission denied";
     }
   );
 }
@@ -33,8 +35,32 @@ function getLocation() {
 document.getElementById("treeForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
+  const loader = document.getElementById("loader");
+  const message = document.getElementById("message");
+
+  message.innerText = "";
+  message.style.color = "";
+
+  const treeName = document.getElementById("treeName").value.trim();
+  const scientificName = document.getElementById("scientificName").value.trim();
+  const plantedYear = document.getElementById("plantedYear").value;
+
+  const maintainedBy = document.getElementById("maintainedBy").value.trim();
+  const rollNo = document.getElementById("rollNo").value.trim();
+  const email = document.getElementById("email").value.trim();
+
+  const imageFile = document.getElementById("image").files[0];
+
+  // Validation
+  if (!treeName || !scientificName || !plantedYear || !maintainedBy || !rollNo || !email || !imageFile) {
+    message.innerText = "Please fill all fields";
+    message.style.color = "red";
+    return;
+  }
+
   if (latitude === null || longitude === null) {
-    alert("Please detect live location first");
+    message.innerText = "Please detect live location first";
+    message.style.color = "red";
     return;
   }
 
@@ -42,32 +68,48 @@ document.getElementById("treeForm").addEventListener("submit", async (e) => {
     return;
   }
 
+  loader.style.display = "block";
+
   const formData = new FormData();
 
-  formData.append("treeName", treeName.value);
-  formData.append("scientificName", scientificName.value);
-  formData.append("plantedYear", plantedYear.value);
-  formData.append("maintainedBy", maintainedBy.value);
-  formData.append("rollNo", rollNo.value);
-  formData.append("email", email.value);
+  formData.append("treeName", treeName);
+  formData.append("scientificName", scientificName);
+  formData.append("plantedYear", plantedYear);
+  formData.append("maintainedBy", maintainedBy);
+  formData.append("rollNo", rollNo);
+  formData.append("email", email);
   formData.append("latitude", latitude);
   formData.append("longitude", longitude);
-  formData.append("image", image.files[0]);
+  formData.append("image", imageFile);
 
-  const res = await fetch(`${API}/api/trees`, {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer " + token
-    },
-    body: formData
-  });
+  try {
+    const res = await fetch(`${API}/api/trees`, {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer " + token
+      },
+      body: formData
+    });
 
-  const data = await res.json();
+    const data = await res.json();
 
-  if (res.ok) {
-    alert("Tree added successfully");
-    window.location.href = "tree-view.html";
-  } else {
-    alert(data.message || "Error adding tree");
+    loader.style.display = "none";
+
+    if (res.ok) {
+      message.innerText = "Tree added successfully ✅";
+      message.style.color = "green";
+
+      setTimeout(() => {
+        window.location.href = "tree-view.html";
+      }, 1500);
+    } else {
+      message.innerText = data.message || "Error adding tree";
+      message.style.color = "red";
+    }
+  } catch (err) {
+    console.error(err);
+    loader.style.display = "none";
+    message.innerText = "Something went wrong";
+    message.style.color = "red";
   }
 });

@@ -1,19 +1,39 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Admin</title>
-  <link rel="stylesheet" href="css/trees-admin.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin | Add Tree</title>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<h2>Add Tree</h2>
+<div style="max-width:500px; margin:auto; padding:20px;">
+  <h2>🌳 Add Tree</h2>
 
-<input id="treeName" placeholder="Tree Name"><br><br>
-<input id="location" placeholder="Location"><br><br>
-<input id="age" type="number" placeholder="Age"><br><br>
+  <input id="treeName" placeholder="Tree Name"><br><br>
+  <input id="scientificName" placeholder="Scientific Name"><br><br>
+  <input id="plantedYear" type="number" placeholder="Planted Year"><br><br>
 
-<button onclick="addTree()">Add Tree</button>
+  <input id="maintainedBy" placeholder="Maintained By"><br><br>
+  <input id="rollNo" placeholder="Roll No"><br><br>
+  <input id="email" placeholder="Email"><br><br>
+
+  <input id="image" type="file" accept="image/*"><br><br>
+
+  <button onclick="detectLocation()">📍 Detect Location</button>
+  <p id="locStatus"></p>
+
+  <button onclick="addTree()">➕ Add Tree</button>
+
+  <!-- LOADER -->
+  <div id="loader" style="display:none; margin-top:10px;">Adding tree...</div>
+
+  <!-- MESSAGE -->
+  <p id="message" style="margin-top:10px;"></p>
+</div>
 
 <script src="js/trees-admin.js"></script>
+
 </body>
 </html>

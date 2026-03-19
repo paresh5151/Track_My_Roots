@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Public Trees | Track My Roots</title>
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+</head>
+
+<body>
+
+<div class="container" style="padding:20px;">
+  <h1>🌳 Tracked Trees</h1>
+
+  <div style="margin-bottom:10px;">
+    <button onclick="locateMe()">📍 Locate Me</button>
+    <input id="searchInput" placeholder="Search tree..." oninput="filterTrees()" style="margin-left:10px;">
+  </div>
+
+  <!-- Tree List -->
+  <ul id="publicTrees"></ul>
+
+  <!-- Map -->
+  <h2>🗺️ Tree Map</h2>
+  <div id="map" style="height:400px; margin-top:10px;"></div>
+</div>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+const list = document.getElementById("publicTrees");
+
+// Initialize map (Vijayawada default)
+const map = L.map("map").setView([16.5062, 80.6480], 14);
+
+L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+  attribution: "© OpenStreetMap"
+}).addTo(map);
+
+let allTrees = [];
+
+// Fetch trees
+fetch("https://track-my-roots-api.onrender.com/api/trees")
+  .then(res => res.json())
+  .then(data => {
+    allTrees = data;
+    renderTrees(data);
+  })
+  .catch(err => {
+    console.error(err);
+    list.innerHTML = "<li>Error loading trees</li>";
+  });
+
+function renderTrees(data) {
+  list.innerHTML = "";
+  map.eachLayer(layer => {
+    if (layer instanceof L.Marker) map.removeLayer(layer);
+  });
+
+  data.forEach(t => {
+    const li = document.createElement("li");
+
+    const lat = t.location?.coordinates?.[1];
+    const lng = t.location?.coordinates?.[0];
+
+    li.innerHTML = `
+      <strong>${t.treeName}</strong><br>
+      🌿 ${t.scientificName}<br>
+      📍 ${lat && lng ? `${lat}, ${lng}` : "Location not available"}<br>
+      👨‍🌾 Maintained by: ${t.maintainedBy}<br>
+      <button onclick="zoomToTree(${lat}, ${lng})">🧭 Zoom</button>
+    `;
+
+    list.appendChild(li);
+
+    if (lat && lng) {
+      L.marker([lat, lng])
+        .addTo(map)
+        .bindPopup(`<strong>${t.treeName}</strong><br>${t.scientificName}`);
+    }
+  });
+}
+
+function filterTrees() {
+  const query = document.getElementById("searchInput").value.toLowerCase();
+  const filtered = allTrees.filter(t =>
+    t.treeName.toLowerCase().includes(query) ||
+    t.scientificName.toLowerCase().includes(query)
+  );
+  renderTrees(filtered);
+}
+
+function locateMe() {
+  navigator.geolocation.getCurrentPosition(pos => {
+    const lat = pos.coords.latitude;
+    const lng = pos.coords.longitude;
+
+    map.setView([lat, lng], 16);
+
+    L.marker([lat, lng])
+      .addTo(map)
+      .bindPopup("📍 You are here")
+      .openPopup();
+  }, () => {
+    alert("Location access denied");
+  });
+}
+
+function zoomToTree(lat, lng) {
+  if (!lat || !lng) return;
+  map.setView([lat, lng], 18);
+}
+</script>
+
+</body>
+</html>

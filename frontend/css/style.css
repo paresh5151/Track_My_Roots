@@ -1,64 +1,85 @@
+/* ===== RESET ===== */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: Arial, sans-serif;
+  font-family: "Segoe UI", Arial, sans-serif;
 }
 
+/* ===== HERO SECTION ===== */
 .hero {
   height: 100vh;
-  background: url("../images/background.png") no-repeat center center/cover;
+  background: linear-gradient(rgba(0,0,0,0.4), rgba(0,0,0,0.4)),
+              url("../images/background.png") no-repeat center center/cover;
+  color: white;
 }
 
+/* ===== TOP BAR ===== */
 .top-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 20px 40px;
   background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(8px);
 }
 
+/* ===== LOGO ===== */
 .logo {
   display: flex;
   align-items: center;
   gap: 12px;
   font-weight: bold;
   font-size: 18px;
+  color: #004d40;
 }
 
 .logo img {
   height: 45px;
 }
 
+/* ===== AUTH LINKS ===== */
 .auth-links a {
   margin-left: 20px;
   text-decoration: none;
   color: #0a7c6f;
   font-weight: bold;
+  transition: 0.3s;
 }
 
+.auth-links a:hover {
+  color: #004d40;
+}
+
+/* ===== HERO CONTENT ===== */
 .hero-content {
   text-align: center;
-  margin-top: 120px;
+  margin-top: 140px;
 }
 
 .hero-content h1 {
-  color: #003333;
-  margin-bottom: 30px;
+  font-size: 40px;
+  margin-bottom: 25px;
+  text-shadow: 0 2px 6px rgba(0,0,0,0.4);
 }
 
+/* ===== SEARCH BOX ===== */
 .search-box {
   display: flex;
   justify-content: center;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .search-box input {
   width: 420px;
+  max-width: 90%;
   padding: 14px;
   font-size: 16px;
   border-radius: 8px;
   border: none;
+  outline: none;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
 }
 
 .search-box button {
@@ -68,4 +89,22 @@
   border: none;
   border-radius: 8px;
   cursor: pointer;
+  transition: 0.3s;
+}
+
+.search-box button:hover {
+  background: #004d40;
+  transform: translateY(-1px);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 600px) {
+  .top-bar {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .hero-content h1 {
+    font-size: 28px;
+  }
 }

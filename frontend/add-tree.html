@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Add Tree</title>
   <link rel="stylesheet" href="css/form.css">
 </head>
@@ -28,12 +30,14 @@
       <p id="locationStatus">Location not detected</p>
     </div>
 
+    <div id="loader" style="display:none; margin:10px 0;">Saving tree...</div>
+    <p id="message" style="margin:10px 0;"></p>
     <button type="submit">Save Tree</button>
 
   </form>
 </div>
 
-<script src="js/gps.js"></script>
-<script src="js/add-tree.js"></script>
+<script src="js/gps.js" defer></script>
+<script src="js/add-tree.js" defer></script>
 </body>
 </html>

@@ -1,0 +1,39 @@
+# ===== NODE =====
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ===== ENV =====
+.env
+.env.*
+!.env.example
+
+# ===== BUILD =====
+dist/
+build/
+
+# ===== UPLOADS =====
+uploads/
+
+# ===== LOGS =====
+logs/
+*.log
+
+# ===== OS FILES =====
+.DS_Store
+Thumbs.db
+
+# ===== IDE =====
+.vscode/
+.idea/
+
+# ===== CACHE =====
+.cache/
+.tmp/
+
+# ===== COVERAGE =====
+coverage/
+
+# ===== MISC =====
+*.swp

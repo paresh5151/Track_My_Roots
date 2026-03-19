@@ -1,11 +1,19 @@
 function searchTree() {
-  const value = document.getElementById("searchInput").value.trim();
+  const input = document.getElementById("searchInput");
+  const value = input.value.trim();
+
+  // Clear previous error styling
+  input.style.border = "";
 
   if (!value) {
-    alert("Enter Tree ID or Name");
+    input.style.border = "2px solid red";
+    alert("Please enter a Tree ID or Name");
     return;
   }
 
-  // redirect to tree details page
-  window.location.href = `tree-view.html?query=${value}`;
+  // Encode query to avoid URL issues
+  const encodedQuery = encodeURIComponent(value);
+
+  // Redirect to tree details page
+  window.location.href = `tree-view.html?query=${encodedQuery}`;
 }
