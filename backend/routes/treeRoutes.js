@@ -96,13 +96,21 @@ router.post(
 );
 
 /* =========================
-   GET ALL TREES (PUBLIC)
+   SEARCH TREES
 ========================= */
-router.get("/", async (req, res) => {
+router.get("/search", async (req, res) => {
   try {
-    const trees = await Tree.find({ isDeleted: false }).sort({
-      createdAt: -1
+    const { q } = req.query;
+
+    if (!q) {
+      return res.status(400).json({ message: "Search query is required" });
+    }
+
+    const trees = await Tree.find({
+      $text: { $search: q },
+      isDeleted: false
     });
+
     res.json(trees);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -121,24 +129,6 @@ router.get("/:id", async (req, res) => {
     }
 
     res.json(tree);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
-
-/* =========================
-   SEARCH TREES
-========================= */
-router.get("/search", async (req, res) => {
-  try {
-    const { q } = req.query;
-
-    const trees = await Tree.find({
-      $text: { $search: q },
-      isDeleted: false
-    });
-
-    res.json(trees);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
