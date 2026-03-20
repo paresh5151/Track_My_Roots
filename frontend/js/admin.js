@@ -31,3 +31,44 @@ if (role !== "admin" && role !== "subadmin") {
   alert("Access denied");
   window.location.href = "index.html";
 }
+
+/* =========================
+   CREATE SUBADMIN
+========================= */
+function createSubAdmin() {
+  const name = document.getElementById("subadminName")?.value.trim();
+  const email = document.getElementById("subadminEmail")?.value.trim();
+  const password = document.getElementById("subadminPassword")?.value.trim();
+
+  if (!name || !email || !password) {
+    alert("All fields are required");
+    return;
+  }
+
+  fetch("https://track-my-roots-api.onrender.com/api/auth/register", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token
+    },
+    body: JSON.stringify({
+      name: name,
+      email: email,
+      password: password,
+      role: "subadmin"
+    })
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.message === "User created successfully") {
+        alert("Subadmin created successfully ✅");
+        window.location.reload();
+      } else {
+        alert(data.message || "Error creating subadmin");
+      }
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Something went wrong");
+    });
+}
