@@ -67,8 +67,10 @@ function addTree() {
   formData.append("email", email);
   formData.append("image", imageFile);
 
+  // Send as GeoJSON-compatible values
   formData.append("latitude", currentLocation.lat);
   formData.append("longitude", currentLocation.lng);
+  formData.append("coordinates", JSON.stringify([currentLocation.lng, currentLocation.lat]));
 
   fetch("https://track-my-roots-api.onrender.com/api/trees", {
     method: "POST",
