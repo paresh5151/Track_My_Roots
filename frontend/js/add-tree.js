@@ -1,8 +1,7 @@
 const API = "https://track-my-roots-api.onrender.com";
 const token = localStorage.getItem("token");
 
-let latitude = null;
-let longitude = null;
+window.appLocation = window.appLocation || { latitude: null, longitude: null };
 
 /* =========================
    GPS DETECTION
@@ -17,11 +16,11 @@ function getLocation() {
 
   navigator.geolocation.getCurrentPosition(
     (pos) => {
-      latitude = pos.coords.latitude;
-      longitude = pos.coords.longitude;
+      window.appLocation.latitude = pos.coords.latitude;
+      window.appLocation.longitude = pos.coords.longitude;
 
       status.innerText =
-        `📍 Location detected (${latitude.toFixed(5)}, ${longitude.toFixed(5)})`;
+        `📍 Location detected (${window.appLocation.latitude.toFixed(5)}, ${window.appLocation.longitude.toFixed(5)})`;
     },
     () => {
       status.innerText = "❌ Location permission denied";
@@ -58,7 +57,7 @@ document.getElementById("treeForm").addEventListener("submit", async (e) => {
     return;
   }
 
-  if (latitude === null || longitude === null) {
+  if (window.appLocation.latitude === null || window.appLocation.longitude === null) {
     message.innerText = "Please detect live location first";
     message.style.color = "red";
     return;
@@ -78,8 +77,8 @@ document.getElementById("treeForm").addEventListener("submit", async (e) => {
   formData.append("maintainedBy", maintainedBy);
   formData.append("rollNo", rollNo);
   formData.append("email", email);
-  formData.append("latitude", latitude);
-  formData.append("longitude", longitude);
+  formData.append("latitude", window.appLocation.latitude);
+  formData.append("longitude", window.appLocation.longitude);
   formData.append("image", imageFile);
 
   try {
