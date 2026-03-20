@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Track My Roots</title>
+  <link rel="stylesheet" href="css/global.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="hero">
@@ -33,5 +34,15 @@
 </div>
 
 <script src="js/index.js" defer></script>
+<script>
+  function searchTree() {
+    const input = document.getElementById("searchInput");
+    const query = (input && input.value || "").trim();
+    if (!query) return;
+
+    // Always redirect to PUBLIC page
+    window.location.href = "tree-view.html?search=" + encodeURIComponent(query);
+  }
+</script>
 </body>
 </html>

@@ -10,6 +10,14 @@
 </head>
 
 <body>
+<script>
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    alert("Please login first");
+    window.location.href = "login.html";
+  }
+</script>
 
 <script src="js/auth.js" defer></script>
 
