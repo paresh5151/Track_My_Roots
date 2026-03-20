@@ -16,9 +16,10 @@
     <span>Track My Roots</span>
   </div>
 
-  <div>
+  <div id="headerActions">
     <button onclick="toggleTheme()" id="themeBtn">🌙</button>
-    <button onclick="logout()">🚪 Logout</button>
+    <button id="loginBtn" style="display:none" onclick="window.location.href='login.html'">🔐 Login</button>
+    <button id="logoutBtn" style="display:none" onclick="logout()">🚪 Logout</button>
   </div>
 </div>
 
@@ -55,7 +56,16 @@
   <div id="errorMsg" style="color:red; margin-top:10px;"></div>
 
   <h3>🌲 Trees List</h3>
+
+  <!-- SEARCH INPUT -->
+  <input 
+    id="searchInput"
+    placeholder="🔍 Search trees by name or scientific name..."
+    style="width:100%; padding:10px; margin:10px 0; border-radius:8px; border:1px solid #ccc;"
+  >
+
   <div id="treeList"></div>
+  <p id="noResultsMsg" style="display:none; color:gray;">No trees found</p>
 
   <!-- MAP -->
   <h3>🗺️ Map View</h3>
@@ -68,15 +78,28 @@
 
 <script>
   const role = localStorage.getItem("role");
+  const token = localStorage.getItem("token");
+  const loginBtn = document.getElementById("loginBtn");
+  const logoutBtn = document.getElementById("logoutBtn");
+
+  if (!token) {
+    loginBtn.style.display = "inline-block";
+  } else {
+    logoutBtn.style.display = "inline-block";
+  }
 
   const addTreeBtn = document.getElementById("addTreeBtn");
   const editTreeBtn = document.getElementById("editTreeBtn");
   const deleteTreeBtn = document.getElementById("deleteTreeBtn");
   const createSubAdminBtn = document.getElementById("createSubAdminBtn");
 
+  // Public page: no forced login
   if (!role) {
-    alert("Session expired. Please login again.");
-    window.location.href = "login.html";
+    // Hide admin buttons if not logged in
+    addTreeBtn.style.display = "none";
+    editTreeBtn.style.display = "none";
+    deleteTreeBtn.style.display = "none";
+    createSubAdminBtn.style.display = "none";
   }
 
   if (role === "admin") {
@@ -93,7 +116,7 @@
 
   // Highlight searched query (if present)
   const params = new URLSearchParams(window.location.search);
-  const searchQuery = params.get("query");
+  const searchQuery = params.get("search");
 
   if (searchQuery) {
     console.log("Searching for:", searchQuery);
