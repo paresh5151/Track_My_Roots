@@ -3,37 +3,102 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin | Add Tree</title>
-  <link rel="stylesheet" href="css/style.css">
+  <title>Admin Dashboard | Track My Roots</title>
+  <link rel="stylesheet" href="css/admin-dashboard.css">
 </head>
+
 <body>
 
-<div style="max-width:500px; margin:auto; padding:20px;">
-  <h2>🌳 Add Tree</h2>
-
-  <input id="treeName" placeholder="Tree Name"><br><br>
-  <input id="scientificName" placeholder="Scientific Name"><br><br>
-  <input id="plantedYear" type="number" placeholder="Planted Year"><br><br>
-
-  <input id="maintainedBy" placeholder="Maintained By"><br><br>
-  <input id="rollNo" placeholder="Roll No"><br><br>
-  <input id="email" placeholder="Email"><br><br>
-
-  <input id="image" type="file" accept="image/*"><br><br>
-
-  <button onclick="detectLocation()">📍 Detect Location</button>
-  <p id="locStatus"></p>
-
-  <button onclick="addTree()">➕ Add Tree</button>
-
-  <!-- LOADER -->
-  <div id="loader" style="display:none; margin-top:10px;">Adding tree...</div>
-
-  <!-- MESSAGE -->
-  <p id="message" style="margin-top:10px;"></p>
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <h2>🌳 Admin</h2>
+  <a href="tree-view.html">View Trees</a>
+  <a href="audit-logs.html">Audit Logs</a>
+  <a href="admin-settings.html">Settings</a>
+  <a href="#" onclick="logout()">Logout</a>
 </div>
 
+<!-- MAIN -->
+<div class="main">
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1>Dashboard</h1>
+  </div>
+
+  <!-- ANALYTICS -->
+  <div class="card" style="display:flex; gap:20px; flex-wrap:wrap;">
+    <div style="flex:1; background:#e8f5e9; padding:15px; border-radius:8px;">
+      <h3>Total Trees</h3>
+      <p id="totalTrees">0</p>
+    </div>
+    <div style="flex:1; background:#e3f2fd; padding:15px; border-radius:8px;">
+      <h3>Total Subadmins</h3>
+      <p id="totalSubadmins">0</p>
+    </div>
+  </div>
+
+  <!-- ADD TREE SECTION -->
+  <div class="card">
+    <h2>🌳 Add Tree</h2>
+
+    <input id="treeName" placeholder="Tree Name">
+    <input id="scientificName" placeholder="Scientific Name">
+    <input id="plantedYear" type="number" placeholder="Planted Year">
+
+    <input id="maintainedBy" placeholder="Maintained By">
+    <input id="rollNo" placeholder="Roll No">
+    <input id="email" placeholder="Email">
+
+    <input id="image" type="file" accept="image/*">
+
+    <button onclick="detectLocation()">📍 Detect Location</button>
+    <p id="locStatus"></p>
+
+    <button onclick="addTree()">➕ Add Tree</button>
+
+    <div id="loader" style="display:none; margin-top:10px;">Adding tree...</div>
+    <p id="message" style="margin-top:10px;"></p>
+  </div>
+
+  <!-- CREATE SUBADMIN SECTION -->
+  <div class="card">
+    <h2>👤 Create Subadmin</h2>
+
+    <input id="subadminName" placeholder="Name">
+    <input id="subadminEmail" placeholder="Email">
+    <input id="subadminPassword" type="password" placeholder="Password">
+
+    <button onclick="createSubAdmin()">Create Subadmin</button>
+  </div>
+
+  <!-- SUBADMIN LIST SECTION -->
+  <div class="card">
+    <h2>📋 Subadmin List</h2>
+
+    <!-- SEARCH -->
+    <input id="subadminSearch" placeholder="Search subadmin..." oninput="filterSubAdmins()" style="margin-bottom:10px;">
+
+    <!-- LIST -->
+    <div id="subadminList">
+      Loading subadmins...
+    </div>
+
+    <!-- PAGINATION -->
+    <div id="pagination" style="margin-top:10px;"></div>
+  </div>
+
+</div>
+
+<script src="js/auth.js"></script>
 <script src="js/trees-admin.js"></script>
+<script src="js/admin.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    loadSubAdmins();
+    loadAnalytics();
+  });
+</script>
 
 </body>
 </html>

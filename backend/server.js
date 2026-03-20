@@ -9,6 +9,7 @@ import authRoutes from "./routes/authRoutes.js";
 import treeRoutes from "./routes/treeRoutes.js";
 // (Optional – only if you created audit routes)
 // import auditRoutes from "./routes/auditRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 
 dotenv.config();
 
@@ -44,6 +45,7 @@ app.use(limiter);
 ========================= */
 app.use("/api/auth", authRoutes);
 app.use("/api/trees", treeRoutes);
+app.use("/api/users", userRoutes);
 // app.use("/api/audit", auditRoutes);
 
 /* =========================
