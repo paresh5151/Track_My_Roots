@@ -18,6 +18,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
   fileFilter: (req, file, cb) => {
     if (!file.mimetype.startsWith("image/")) {
       return cb(new Error("Only image files are allowed"), false);
@@ -62,21 +63,36 @@ router.post(
         return res.status(400).json({ message: "All fields are required" });
       }
 
+      // ✅ Sanitization
+      const cleanTreeName = treeName.trim();
+      const cleanScientificName = scientificName.trim();
+      const cleanMaintainedBy = maintainedBy.trim();
+      const cleanRollNo = rollNo.trim();
+      const cleanEmail = email.toLowerCase().trim();
+
+      // ✅ Numeric validation
+      const lat = parseFloat(latitude);
+      const lng = parseFloat(longitude);
+
+      if (isNaN(lat) || isNaN(lng)) {
+        return res.status(400).json({ message: "Invalid coordinates" });
+      }
+
       // ✅ Safe Tree ID
       const treeId = `JNTUK-TREE-${Date.now()}`;
 
       const tree = await Tree.create({
         treeId,
-        treeName,
-        scientificName,
+        treeName: cleanTreeName,
+        scientificName: cleanScientificName,
         plantedYear,
-        maintainedBy,
-        rollNo,
-        email,
+        maintainedBy: cleanMaintainedBy,
+        rollNo: cleanRollNo,
+        email: cleanEmail,
         imagePath: req.file.path,
         location: {
-          latitude: parseFloat(latitude),
-          longitude: parseFloat(longitude)
+          type: "Point",
+          coordinates: [lng, lat]
         },
         createdBy: req.user.id
       });
@@ -109,7 +125,9 @@ router.get("/search", async (req, res) => {
     const trees = await Tree.find({
       $text: { $search: q },
       isDeleted: false
-    });
+    })
+    .limit(50)
+    .sort({ createdAt: -1 });
 
     res.json(trees);
   } catch (err) {
@@ -122,7 +140,13 @@ router.get("/search", async (req, res) => {
 ========================= */
 router.get("/:id", async (req, res) => {
   try {
-    const tree = await Tree.findById(req.params.id);
+    const { id } = req.params;
+
+    if (!id || id.length !== 24) {
+      return res.status(400).json({ message: "Invalid ID" });
+    }
+
+    const tree = await Tree.findById(id);
 
     if (!tree || tree.isDeleted) {
       return res.status(404).json({ message: "Tree not found" });

@@ -4,7 +4,8 @@ const treeSchema = new mongoose.Schema(
   {
     treeId: {
       type: String,
-      unique: true
+      unique: true,
+      index: true
     },
 
     treeName: {
@@ -28,12 +29,14 @@ const treeSchema = new mongoose.Schema(
 
     maintainedBy: {
       type: String,
-      required: true
+      required: true,
+      trim: true
     },
 
     rollNo: {
       type: String,
-      required: true
+      required: true,
+      trim: true
     },
 
     email: {
@@ -57,7 +60,13 @@ const treeSchema = new mongoose.Schema(
       },
       coordinates: {
         type: [Number], // [longitude, latitude]
-        required: true
+        required: true,
+        validate: {
+          validator: function (v) {
+            return Array.isArray(v) && v.length === 2;
+          },
+          message: "Coordinates must be [longitude, latitude]"
+        }
       }
     },
 
@@ -71,7 +80,7 @@ const treeSchema = new mongoose.Schema(
       default: false
     }
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
 /* 🔍 Search Index */
@@ -79,5 +88,15 @@ treeSchema.index({ treeName: "text", scientificName: "text" });
 
 /* 📍 Location Index (NOT unique to avoid GPS issues) */
 treeSchema.index({ location: "2dsphere" });
+
+/* ⚡ Active Trees Index */
+treeSchema.index({ isDeleted: 1, createdAt: -1 });
+
+treeSchema.set("toJSON", {
+  transform: function (doc, ret) {
+    delete ret.__v;
+    return ret;
+  }
+});
 
 export default mongoose.model("Tree", treeSchema);

@@ -3,6 +3,7 @@ import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import { verifyToken } from "../middleware/auth.js";
 import { allowRoles } from "../middleware/role.js";
+import mongoose from "mongoose";
 
 const router = express.Router();
 
@@ -15,7 +16,7 @@ router.get(
   allowRoles("admin"),
   async (req, res) => {
     try {
-      const users = await User.find().select("-password");
+      const users = await User.find();
       res.json(users);
     } catch (err) {
       res.status(500).json({ message: err.message });
@@ -32,7 +33,24 @@ router.delete(
   allowRoles("admin"),
   async (req, res) => {
     try {
-      await User.findByIdAndDelete(req.params.id);
+      const { id } = req.params;
+
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+
+      const user = await User.findById(id);
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      if (user.role === "admin") {
+        return res.status(403).json({ message: "Cannot delete admin" });
+      }
+
+      await User.findByIdAndDelete(id);
+
       res.json({ message: "User deleted" });
     } catch (err) {
       res.status(500).json({ message: err.message });
@@ -49,13 +67,29 @@ router.put(
   allowRoles("admin"),
   async (req, res) => {
     try {
+      const { id } = req.params;
       const { name, email } = req.body;
 
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+
+      if (!name || !email) {
+        return res.status(400).json({ message: "Name and email required" });
+      }
+
       const updated = await User.findByIdAndUpdate(
-        req.params.id,
-        { name, email },
+        id,
+        {
+          name: name.trim(),
+          email: email.toLowerCase().trim()
+        },
         { new: true }
-      ).select("-password");
+      );
+
+      if (!updated) {
+        return res.status(404).json({ message: "User not found" });
+      }
 
       res.json(updated);
     } catch (err) {
@@ -73,13 +107,26 @@ router.put(
   allowRoles("admin"),
   async (req, res) => {
     try {
+      const { id } = req.params;
       const { password } = req.body;
+
+      if (!mongoose.Types.ObjectId.isValid(id)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+
+      if (!password || password.length < 6) {
+        return res.status(400).json({ message: "Password must be at least 6 characters" });
+      }
 
       const hashed = await bcrypt.hash(password, 10);
 
-      await User.findByIdAndUpdate(req.params.id, {
+      const user = await User.findByIdAndUpdate(id, {
         password: hashed
       });
+
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
 
       res.json({ message: "Password updated" });
     } catch (err) {

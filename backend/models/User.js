@@ -19,7 +19,9 @@ const userSchema = new mongoose.Schema(
 
     password: {
       type: String,
-      required: true
+      required: true,
+      minlength: 6,
+      select: false
     },
 
     role: {
@@ -28,10 +30,19 @@ const userSchema = new mongoose.Schema(
       default: "subadmin"
     }
   },
-  { timestamps: true }
+  { timestamps: true, versionKey: false }
 );
 
 /* Index for faster email lookup */
-userSchema.index({ email: 1 });
+userSchema.index({ email: 1 }, { unique: true });
+
+/* Hide sensitive fields in responses */
+userSchema.set("toJSON", {
+  transform: function (doc, ret) {
+    delete ret.password;
+    delete ret.__v;
+    return ret;
+  }
+});
 
 export default mongoose.model("User", userSchema);
