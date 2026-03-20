@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
+import path from "path";
 
 // Routes
 import authRoutes from "./routes/authRoutes.js";
@@ -33,6 +34,18 @@ app.use(
     etag: true
   })
 );
+
+/* =========================
+   STATIC FRONTEND (CSS, IMAGES, HTML)
+========================= */
+const __dirname = path.resolve();
+
+app.use("/css", express.static(path.join(__dirname, "frontend/css")));
+app.use("/images", express.static(path.join(__dirname, "frontend/images")));
+app.use("/js", express.static(path.join(__dirname, "frontend/js")));
+
+// Serve main frontend pages
+app.use(express.static(path.join(__dirname, "frontend")));
 
 app.use(cors({
   origin: [
