@@ -1,60 +1,60 @@
-<h2>Add Tree</h2>
-
-<input id="treeId" placeholder="Tree ID">
-<input id="name" placeholder="Tree Name">
-<input id="year" placeholder="Planted Year">
-<input id="maintainedBy" placeholder="Maintained By">
-<input id="rollNo" placeholder="Roll No">
-<input id="email" placeholder="Email">
-<input id="imageUrl" placeholder="Image URL">
-<textarea id="note" placeholder="Location note"></textarea>
-
-<button onclick="detectLocation()">Detect Live Location</button>
-<p id="locStatus"></p>
-
-<button onclick="addTree()">Add Tree</button>
-
 <!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Add Tree</title>
+  <link rel="stylesheet" href="css/global.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
 
-<div style="max-width:500px; margin:auto; padding:20px;">
+<!-- TOP HEADER -->
+<div class="top-header">
+  <div class="logo">
+    <img src="images/logo.png" alt="Track My Roots Logo">
+    <span>Track My Roots</span>
+  </div>
+  <div style="display:flex; gap:10px;">
+    <button onclick="toggleTheme()" id="themeBtn">🌙</button>
+    <button onclick="window.location.href='admin.html'">🏠 Dashboard</button>
+  </div>
+</div>
 
-  <h2>🌳 Add Tree</h2>
-
-  <input id="treeId" placeholder="Tree ID (optional)">
-  <input id="name" placeholder="Tree Name">
-  <input id="scientificName" placeholder="Scientific Name">
-  <input id="year" type="number" placeholder="Planted Year">
-  <input id="maintainedBy" placeholder="Maintained By">
-  <input id="rollNo" placeholder="Roll No">
-  <input id="email" placeholder="Email">
-
-  <input id="image" type="file" accept="image/*">
-
-  <textarea id="note" placeholder="Location note"></textarea>
-
-  <button onclick="detectLocation()">📍 Detect Live Location</button>
-  <p id="locStatus"></p>
-
-  <button onclick="addTree()">➕ Add Tree</button>
-
-  <!-- LOADER -->
-  <div id="loader" style="display:none">Adding tree...</div>
-
-  <!-- ERROR / SUCCESS -->
-  <p id="message" style="margin-top:10px;"></p>
-
+<!-- MAIN CONTENT -->
+<div class="fade-in" style="max-width:600px; margin:auto; padding:20px;">
+  <div class="card">
+    <h2>🌳 Add Tree</h2>
+    <input id="treeId" placeholder="Tree ID (optional)">
+    <input id="name" placeholder="Tree Name">
+    <input id="scientificName" placeholder="Scientific Name">
+    <input id="year" type="number" placeholder="Planted Year">
+    <input id="maintainedBy" placeholder="Maintained By">
+    <input id="rollNo" placeholder="Roll No">
+    <input id="email" placeholder="Email">
+    <input id="image" type="file" accept="image/*">
+    <textarea id="note" placeholder="Location note"></textarea>
+    <button onclick="detectLocation()">📍 Detect Live Location</button>
+    <p id="locStatus"></p>
+    <button onclick="addTree()">➕ Add Tree</button>
+    <!-- LOADER -->
+    <div id="loader" style="display:none; margin-top:10px;">Adding tree...</div>
+    <!-- MESSAGE -->
+    <p id="message" style="margin-top:10px;"></p>
+  </div>
 </div>
 
 <script src="js/trees-admin.js"></script>
-
+<script>
+function toggleTheme() {
+  const body = document.body;
+  body.classList.toggle("dark");
+  const btn = document.getElementById("themeBtn");
+  btn.innerText = body.classList.contains("dark") ? "☀️" : "🌙";
+}
+document.addEventListener("DOMContentLoaded", () => {
+  document.body.classList.add("loaded");
+});
+</script>
 </body>
 </html>

@@ -4,16 +4,25 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard</title>
+  <link rel="stylesheet" href="css/global.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<header class="top-bar">
-  <h2>🌳 Track My Roots – Dashboard</h2>
-  <button onclick="logout()">🚪 Logout</button>
-</header>
+<!-- TOP HEADER -->
+<div class="top-header">
+  <div class="logo">
+    <img src="images/logo.png">
+    <span>Track My Roots</span>
+  </div>
 
-<div style="padding:20px">
+  <div>
+    <button onclick="toggleTheme()" id="themeBtn">🌙</button>
+    <button onclick="logout()">🚪 Logout</button>
+  </div>
+</div>
+
+<div class="fade-in" style="padding:20px">
 
   <!-- ACTION BUTTONS -->
   <div style="margin-bottom:20px; display:flex; gap:10px; flex-wrap:wrap">
@@ -93,5 +102,18 @@
   }
 </script>
 
+<script>
+function toggleTheme() {
+  const body = document.body;
+  body.classList.toggle("dark");
+
+  const btn = document.getElementById("themeBtn");
+  btn.innerText = body.classList.contains("dark") ? "☀️" : "🌙";
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.body.classList.add("loaded");
+});
+</script>
 </body>
 </html>

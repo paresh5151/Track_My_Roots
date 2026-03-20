@@ -4,43 +4,79 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Audit Logs | Track My Roots</title>
+
+  <link rel="stylesheet" href="css/global.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
 
 <script src="js/auth.js" defer></script>
 
-<nav class="navbar">
-  <a href="index.html">Dashboard</a>
-  <a href="trees-admin.html">Trees</a>
-  <a href="audit-logs.html" id="auditNav">Audit Logs</a>
-  <a href="admin-settings.html">Admin Settings</a>
-  <a href="#" onclick="logout()">Logout</a>
-</nav>
+<!-- TOP HEADER -->
+<div class="top-header">
+  <div class="logo">
+    <img src="images/logo.png">
+    <span>Track My Roots</span>
+  </div>
 
-<div class="container">
-  <h1>Audit Logs</h1>
-  <div id="loader" style="display:none; margin-bottom:10px;">Loading audit logs...</div>
-  <div id="errorMsg" style="color:red; margin-bottom:10px;"></div>
+  <div style="display:flex; gap:10px;">
+    <button onclick="toggleTheme()" id="themeBtn">🌙</button>
+    <button onclick="window.location.href='admin.html'">🏠 Dashboard</button>
+    <button onclick="logout()">🚪 Logout</button>
+  </div>
+</div>
 
-  <table border="1" width="100%">
-    <thead>
-      <tr>
-        <th>Action</th>
-        <th>User Email</th>
-        <th>Entity</th>
-        <th>Details</th>
-        <th>Time</th>
-      </tr>
-    </thead>
-    <tbody id="logs">
-      <tr>
-        <td colspan="5">Loading audit logs…</td>
-      </tr>
-    </tbody>
-  </table>
+<!-- MAIN CONTENT -->
+<div class="fade-in" style="padding:20px;">
+
+  <div class="card">
+    <h1>📋 Audit Logs</h1>
+
+    <div id="loader" style="display:none; margin-bottom:10px;">Loading audit logs...</div>
+    <div id="errorMsg" style="color:red; margin-bottom:10px;"></div>
+
+    <div style="overflow-x:auto;">
+      <table style="width:100%; border-collapse: collapse;">
+        <thead style="background:#2e7d32; color:white;">
+          <tr>
+            <th style="padding:10px;">Action</th>
+            <th style="padding:10px;">User Email</th>
+            <th style="padding:10px;">Entity</th>
+            <th style="padding:10px;">Details</th>
+            <th style="padding:10px;">Time</th>
+          </tr>
+        </thead>
+
+        <tbody id="logs">
+          <tr>
+            <td colspan="5" style="padding:10px; text-align:center;">
+              Loading audit logs…
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
 </div>
 
 <script src="js/audit-logs.js" defer></script>
+
+<script>
+function toggleTheme() {
+  const body = document.body;
+  body.classList.toggle("dark");
+
+  const btn = document.getElementById("themeBtn");
+  btn.innerText = body.classList.contains("dark") ? "☀️" : "🌙";
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.body.classList.add("loaded");
+});
+</script>
+
 </body>
 </html>

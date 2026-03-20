@@ -4,36 +4,65 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Settings | Track My Roots</title>
+
+  <link rel="stylesheet" href="css/global.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
+
 <body>
 
 <script src="js/auth.js" defer></script>
 
-<nav class="navbar">
-  <a href="index.html">Dashboard</a>
-  <a href="trees-admin.html">Trees</a>
-  <a href="audit-logs.html" id="auditNav">Audit Logs</a>
-  <a href="admin-settings.html">Admin Settings</a>
-  <a href="#" onclick="logout()">Logout</a>
-</nav>
+<!-- TOP HEADER -->
+<div class="top-header">
+  <div class="logo">
+    <img src="images/logo.png">
+    <span>Track My Roots</span>
+  </div>
 
-<div class="container" style="max-width:400px; margin:auto; padding:20px;">
-  <h1>🔐 Change Password</h1>
+  <div style="display:flex; gap:10px;">
+    <button onclick="toggleTheme()" id="themeBtn">🌙</button>
+    <button onclick="window.location.href='admin.html'">🏠 Dashboard</button>
+    <button onclick="logout()">🚪 Logout</button>
+  </div>
+</div>
 
-  <input id="oldPass" type="password" placeholder="Current Password"><br><br>
-  <input id="newPass" type="password" placeholder="New Password"><br><br>
-  <input id="confirmPass" type="password" placeholder="Confirm New Password"><br><br>
+<!-- MAIN CONTENT -->
+<div class="fade-in" style="max-width:450px; margin:auto; padding:20px;">
 
-  <button onclick="changePass()">Update Password</button>
+  <div class="card">
+    <h1>🔐 Change Password</h1>
 
-  <!-- LOADER -->
-  <div id="loader" style="display:none; margin-top:10px;">Updating password...</div>
+    <input id="oldPass" type="password" placeholder="Current Password">
+    <input id="newPass" type="password" placeholder="New Password">
+    <input id="confirmPass" type="password" placeholder="Confirm New Password">
 
-  <!-- MESSAGE -->
-  <p id="msg" style="margin-top:10px;"></p>
+    <button onclick="changePass()">Update Password</button>
+
+    <!-- LOADER -->
+    <div id="loader" style="display:none; margin-top:10px;">Updating password...</div>
+
+    <!-- MESSAGE -->
+    <p id="msg" style="margin-top:10px;"></p>
+  </div>
+
 </div>
 
 <script src="js/admin-settings.js" defer></script>
+
+<script>
+function toggleTheme() {
+  const body = document.body;
+  body.classList.toggle("dark");
+
+  const btn = document.getElementById("themeBtn");
+  btn.innerText = body.classList.contains("dark") ? "☀️" : "🌙";
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  document.body.classList.add("loaded");
+});
+</script>
+
 </body>
 </html>
