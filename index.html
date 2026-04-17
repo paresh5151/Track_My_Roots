@@ -7,10 +7,8 @@
 
     <title>Track My Roots</title>
 
-    <!-- CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
-    <!-- LEAFLET -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
@@ -23,6 +21,36 @@
             margin: 0;
             font-family: Arial;
             background: url('/images/background.png') center/cover no-repeat;
+        }
+
+        /* LOADING SCREEN */
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            flex-direction: column;
+        }
+
+        .spinner {
+            border: 6px solid #eee;
+            border-top: 6px solid #10b981;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         .overlay {
@@ -85,17 +113,18 @@
             background: white;
             border-radius: 8px;
             display: none;
-            max-height: 150px;
+            max-height: 180px;
             overflow-y: auto;
+            z-index: 100;
         }
 
         .suggestion-item {
-            padding: 8px;
+            padding: 10px;
             cursor: pointer;
         }
 
         .suggestion-item:hover {
-            background: #eee;
+            background: #e0f2fe;
         }
 
         #speciesContainer {
@@ -139,10 +168,6 @@
             cursor: pointer;
         }
 
-        #distanceBox:hover {
-            background: #e2e8f0;
-        }
-
         button.navigate {
             margin-top: 10px;
             width: 100%;
@@ -162,6 +187,12 @@
 </head>
 
 <body>
+
+    <!-- LOADER -->
+    <div id="loader">
+        <div class="spinner"></div>
+        <p>Loading trees...</p>
+    </div>
 
     <div class="overlay">
 
@@ -218,51 +249,47 @@
 
         let PLANTS = [];
         let map;
-        let allMarkers = [];
         let line;
 
-        // parse coords
+        const input = document.getElementById("treeInput");
+        const suggestionsBox = document.getElementById("suggestionsBox");
+
+        // helpers
         function parseCoords(str) {
             str = str.replace(/[°"]/g, "");
             let parts = str.split(",");
             return { lat: parseFloat(parts[0]), lng: parseFloat(parts[1]) };
         }
 
-        // distance
         function getDistance(a, b, c, d) {
             let R = 6371000;
             let toRad = x => x * Math.PI / 180;
             let dLat = toRad(c - a);
             let dLon = toRad(d - b);
-
             let val = Math.sin(dLat / 2) ** 2 +
                 Math.cos(toRad(a)) * Math.cos(toRad(c)) *
                 Math.sin(dLon / 2) ** 2;
-
             return R * 2 * Math.atan2(Math.sqrt(val), Math.sqrt(1 - val));
         }
 
-        // init map
         function initMap() {
             if (map) return;
             map = L.map('map').setView([16.9797, 82.2426], 18);
-
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap'
-            }).addTo(map);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
         }
 
+        // LOAD CSV
         Papa.parse("trees.csv", {
             download: true,
             header: true,
             complete: function (res) {
 
-                PLANTS = res.data;
+                PLANTS = res.data.filter(p => p["Tree ID"]);
 
                 document.getElementById("treeCount").innerText = PLANTS.length;
 
+                // species
                 let species = {};
-
                 PLANTS.forEach(p => {
                     let n = p["Tree Name"];
                     if (n) species[n] = (species[n] || 0) + 1;
@@ -281,7 +308,7 @@
 
                 initMap();
 
-                // SHOW ALL TREES
+                // markers
                 PLANTS.forEach(p => {
                     let coords = p["GPS Coordinate"];
                     if (!coords) return;
@@ -289,24 +316,59 @@
                     let parsed = parseCoords(coords);
 
                     let marker = L.marker([parsed.lat, parsed.lng]).addTo(map)
-                        .bindPopup(`${p["Tree Name"]}`);
+                        .bindPopup(p["Tree Name"]);
 
                     marker.on("click", () => {
-                        document.getElementById("treeInput").value = p["Tree ID"];
+                        input.value = p["Tree ID"];
                         lookup();
                     });
-
-                    allMarkers.push(marker);
                 });
+
+                // 🔥 HIDE LOADER
+                document.getElementById("loader").style.display = "none";
 
             }
         });
 
-        // SEARCH
+        // SEARCH SUGGESTIONS
+        input.addEventListener("input", () => {
+            let val = input.value.toLowerCase().trim();
+
+            if (!val) {
+                suggestionsBox.style.display = "none";
+                return;
+            }
+
+            let results = PLANTS.filter(p =>
+                (p["Tree ID"] + " " + p["Tree Name"]).toLowerCase().includes(val)
+            ).slice(0, 10);
+
+            if (results.length === 0) {
+                suggestionsBox.style.display = "none";
+                return;
+            }
+
+            suggestionsBox.innerHTML = results.map(p => `
+<div class="suggestion-item" data-id="${p["Tree ID"]}">
+[${p["Tree ID"]}] ${p["Tree Name"]}
+</div>`).join("");
+
+            suggestionsBox.style.display = "block";
+        });
+
+        suggestionsBox.addEventListener("click", (e) => {
+            let item = e.target.closest(".suggestion-item");
+            if (!item) return;
+
+            input.value = item.dataset.id;
+            suggestionsBox.style.display = "none";
+            lookup();
+        });
+
+        // lookup
         function lookup() {
 
-            let id = document.getElementById("treeInput").value;
-
+            let id = input.value.trim();
             let plant = PLANTS.find(p => p["Tree ID"] == id);
 
             if (!plant) { alert("Not found"); return; }
@@ -314,53 +376,45 @@
             document.getElementById("id").innerText = plant["Tree ID"];
             document.getElementById("name").innerText = plant["Tree Name"];
             document.getElementById("year").innerText = plant["Planted Year"];
-            document.getElementById("maintainer").innerText = plant["maintained_by"];
-            document.getElementById("roll").innerText = plant["roll_no"];
-            document.getElementById("email").innerText = plant["email_id"];
+            document.getElementById("maintainer").innerText = plant["maintained by"];
+            document.getElementById("roll").innerText = plant["roll no"];
+            document.getElementById("email").innerText = plant["email id"];
 
             let p = parseCoords(plant["GPS Coordinate"]);
-            let r = parseCoords(plant["reference_point"]);
+            let r = parseCoords(plant["reference point"]);
 
             map.setView([p.lat, p.lng], 19);
 
-            // line
             if (line) map.removeLayer(line);
-
             line = L.polyline([[p.lat, p.lng], [r.lat, r.lng]], { color: 'green' }).addTo(map);
 
-            // distance
             let d = getDistance(p.lat, p.lng, r.lat, r.lng);
-
             let text = d < 1000 ? Math.round(d) + " m" : (d / 1000).toFixed(2) + " km";
 
             document.getElementById("distance").innerText =
-                `Located ${text} from ${plant["department_name"]}`;
+                `Located ${text} from ${plant["department name"]}`;
 
-            // store coords
             distanceBox.dataset.plat = p.lat;
             distanceBox.dataset.plng = p.lng;
             distanceBox.dataset.rlat = r.lat;
             distanceBox.dataset.rlng = r.lng;
-
         }
 
-        // FILTER
+        // filter
         function filterBySpecies(name) {
             let p = PLANTS.find(x => x["Tree Name"] == name);
             if (p) {
-                document.getElementById("treeInput").value = p["Tree ID"];
+                input.value = p["Tree ID"];
                 lookup();
             }
         }
 
-        // NAVIGATION
+        // navigation
         document.getElementById("navigateBtn").onclick = function () {
             let d = distanceBox.dataset;
-            let url = `https://www.google.com/maps/dir/?api=1&origin=${d.plat},${d.plng}&destination=${d.rlat},${d.rlng}`;
-            window.open(url, "_blank");
+            window.open(`https://www.google.com/maps/dir/?api=1&origin=${d.plat},${d.plng}&destination=${d.rlat},${d.rlng}`, "_blank");
         };
 
-        // CLICK DISTANCE BOX
         document.getElementById("distanceBox").onclick = function () {
             document.getElementById("navigateBtn").click();
         };
