@@ -4,7 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Track My Roots</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
@@ -20,7 +19,7 @@
             color: white;
         }
 
-        /* 🎨 GRADIENT OVERLAY */
+        /* 🎨 OVERLAY */
         .overlay {
             min-height: 100vh;
             background: linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(16, 185, 129, 0.3));
@@ -33,7 +32,7 @@
             margin: auto;
         }
 
-        /* 💎 GLASS CARD */
+        /* 💎 CARDS */
         .card,
         .panel {
             background: rgba(255, 255, 255, 0.08);
@@ -44,7 +43,7 @@
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
         }
 
-        /* 🧭 HEADER */
+        /* HEADER */
         .header {
             display: flex;
             align-items: center;
@@ -61,7 +60,7 @@
             font-weight: bold;
         }
 
-        /* 🔍 SEARCH */
+        /* SEARCH */
         .search-box {
             display: flex;
             gap: 10px;
@@ -87,10 +86,9 @@
             border: none;
             color: white;
             border-radius: 10px;
-            cursor: pointer;
         }
 
-        /* 💡 SUGGESTIONS */
+        /* SUGGESTIONS */
         #suggestionsBox {
             position: absolute;
             top: 50px;
@@ -111,7 +109,7 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
-        /* 🌿 SPECIES */
+        /* SPECIES */
         #speciesContainer {
             display: flex;
             flex-wrap: wrap;
@@ -127,7 +125,7 @@
             border: 1px solid rgba(16, 185, 129, 0.4);
         }
 
-        /* 🗺️ MAIN */
+        /* MAIN */
         .main {
             display: none;
             margin-top: 20px;
@@ -145,14 +143,24 @@
             border-radius: 10px;
         }
 
-        /* 📸 IMAGE */
+        /* 🖼️ IMAGE FIX */
         #treeImage {
             width: 100%;
+            max-height: 220px;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-top: 10px;
+        }
+
+        /* 📍 DISTANCE BOX */
+        #distance {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
             border-radius: 10px;
             margin-top: 10px;
         }
 
-        /* 🔄 LOADER */
+        /* LOADER */
         .spinner {
             border: 5px solid rgba(255, 255, 255, 0.2);
             border-top: 5px solid #10b981;
@@ -169,7 +177,7 @@
             }
         }
 
-        /* 📱 MOBILE */
+        /* MOBILE */
         @media(max-width:768px) {
             .main {
                 flex-direction: column;
@@ -258,7 +266,7 @@
             }
         });
 
-        // 🌿 SPECIES
+        // SPECIES
         function loadSpecies() {
             let species = {};
 
@@ -342,7 +350,8 @@
                 document.getElementById("roll").innerText = plant.roll_no;
                 document.getElementById("email").innerText = plant.email_id;
 
-                document.getElementById("treeImage").src = plant.photo;
+                document.getElementById("treeImage").src =
+                    plant.photo || "https://via.placeholder.com/300";
 
                 let p = parseCoords(plant.gps_coordinate);
                 let r = parseCoords(plant.reference_point);
@@ -356,7 +365,10 @@
                 line = L.polyline([[p.lat, p.lng], [r.lat, r.lng]]).addTo(map);
 
                 let d = getDistance(p.lat, p.lng, r.lat, r.lng);
-                document.getElementById("distance").innerText = "Distance: " + Math.round(d) + " m";
+
+                // 🔥 FINAL FIX HERE
+                document.getElementById("distance").innerHTML =
+                    `📍 Located <b>${Math.round(d)} m</b> from <b>${plant.department_name}</b>`;
 
                 window.nav = { p, r };
 
@@ -366,6 +378,7 @@
             }, 300);
         }
 
+        // HELPERS
         function parseCoords(s) {
             let a = s.split(",");
             return { lat: parseFloat(a[0]), lng: parseFloat(a[1]) };
