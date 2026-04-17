@@ -16,24 +16,41 @@
         body {
             margin: 0;
             font-family: Arial;
-            background: #f1f5f9;
+
+            background-image: url('/images/background.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* OVERLAY */
+        .overlay {
+            background: rgba(255, 255, 255, 0.88);
+            min-height: 100vh;
         }
 
         /* HEADER */
         .header {
-            background: #065f46;
-            color: white;
-            padding: 15px;
             display: flex;
-            gap: 10px;
             align-items: center;
+            gap: 12px;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            margin: 15px;
         }
 
-        /* DASHBOARD */
+        .logo {
+            height: 60px;
+            width: 60px;
+        }
+
+        /* CONTAINER */
         .container {
             padding: 20px;
         }
 
+        /* DASHBOARD */
         .dashboard {
             display: flex;
             gap: 15px;
@@ -85,6 +102,7 @@
             display: none;
             max-height: 150px;
             overflow-y: auto;
+            z-index: 10;
         }
 
         .suggestion-item {
@@ -145,51 +163,59 @@
 
 <body>
 
-    <div class="header">
-        <h2>🌳 Track My Roots</h2>
-    </div>
+    <div class="overlay">
 
-    <div class="container">
-
-        <!-- DASHBOARD -->
-        <div class="dashboard">
-            <div class="card">
-                <h3>Total Trees</h3>
-                <p id="treeCount">0</p>
-            </div>
-
-            <div class="card">
-                <h3>Top Tree</h3>
-                <p id="topTree">-</p>
+        <!-- HEADER -->
+        <div class="header">
+            <img src="/images/logo.png" class="logo">
+            <div>
+                <h2>JNTUK Kakinada — Track My Roots</h2>
+                <small>Digital Tree Tracking System</small>
             </div>
         </div>
 
-        <!-- SPECIES -->
-        <h3>🌿 Trees by Species</h3>
-        <div id="speciesContainer"></div>
+        <div class="container">
 
-        <!-- SEARCH -->
-        <div class="search-box">
-            <input id="treeInput" placeholder="Search Tree ID or Name">
-            <button onclick="lookup()">Search</button>
+            <!-- DASHBOARD -->
+            <div class="dashboard">
+                <div class="card">
+                    <h3>Total Trees</h3>
+                    <p id="treeCount">0</p>
+                </div>
 
-            <div id="suggestionsBox"></div>
-        </div>
-
-        <!-- RESULT -->
-        <div class="main" id="mainPanel">
-            <div class="panel">
-                <iframe id="mapFrame" width="100%" height="300"></iframe>
+                <div class="card">
+                    <h3>Top Tree</h3>
+                    <p id="topTree">-</p>
+                </div>
             </div>
 
-            <div class="panel">
-                <p><b>ID:</b> <span id="id"></span></p>
-                <p><b>Name:</b> <span id="name"></span></p>
-                <p><b>Year:</b> <span id="year"></span></p>
-                <p><b>Maintained By:</b> <span id="maintainer"></span></p>
-                <p><b>Roll No:</b> <span id="roll"></span></p>
-                <p><b>Email:</b> <span id="email"></span></p>
+            <!-- SPECIES -->
+            <h3>🌿 Trees by Species</h3>
+            <div id="speciesContainer"></div>
+
+            <!-- SEARCH -->
+            <div class="search-box">
+                <input id="treeInput" placeholder="Search Tree ID or Name">
+                <button onclick="lookup()">Search</button>
+                <div id="suggestionsBox"></div>
             </div>
+
+            <!-- RESULT -->
+            <div class="main" id="mainPanel">
+                <div class="panel">
+                    <iframe id="mapFrame" width="100%" height="300"></iframe>
+                </div>
+
+                <div class="panel">
+                    <p><b>ID:</b> <span id="id"></span></p>
+                    <p><b>Name:</b> <span id="name"></span></p>
+                    <p><b>Year:</b> <span id="year"></span></p>
+                    <p><b>Maintained By:</b> <span id="maintainer"></span></p>
+                    <p><b>Roll No:</b> <span id="roll"></span></p>
+                    <p><b>Email:</b> <span id="email"></span></p>
+                </div>
+            </div>
+
         </div>
 
     </div>
@@ -298,11 +324,8 @@
 
         /* FILTER */
         function filterBySpecies(name) {
-
             const plant = PLANTS.find(p => p["Tree Name"] === name);
-
             if (!plant) return;
-
             document.getElementById("treeInput").value = plant["Tree ID"];
             lookup();
         }
