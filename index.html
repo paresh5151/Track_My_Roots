@@ -8,7 +8,6 @@
     <title>Track My Roots</title>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
@@ -23,7 +22,6 @@
             background: url('/images/background.png') center/cover no-repeat;
         }
 
-        /* PAGE LOADER */
         #loader {
             position: fixed;
             width: 100%;
@@ -51,14 +49,8 @@
             }
         }
 
-        /* SEARCH LOADER */
-        #searchLoader {
-            display: none;
-            text-align: center;
-            margin-top: 20px;
-        }
-
         .overlay {
+            background: rgba(255, 255, 255, 0.9);
             min-height: 100vh;
         }
 
@@ -132,20 +124,6 @@
             background: #e0f2fe;
         }
 
-        #speciesContainer {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 10px;
-        }
-
-        .species-box {
-            background: #d1fae5;
-            padding: 6px 10px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
-
         .main {
             margin-top: 20px;
             display: none;
@@ -183,6 +161,12 @@
             border-radius: 8px;
         }
 
+        #searchLoader {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
         @media(max-width:768px) {
             .main {
                 flex-direction: column;
@@ -193,7 +177,6 @@
 
 <body>
 
-    <!-- PAGE LOADER -->
     <div id="loader">
         <div class="spinner"></div>
         <p>Loading trees...</p>
@@ -212,23 +195,18 @@
                 <div class="card"><b>Total Trees</b><br><span id="treeCount"></span></div>
             </div>
 
-            <h3>🌿 Trees by Species</h3>
-            <div id="speciesContainer"></div>
-
             <div class="search-box">
                 <input id="treeInput" placeholder="Search Tree ID or Name">
                 <button onclick="lookup()">Search</button>
                 <div id="suggestionsBox"></div>
             </div>
 
-            <!-- SEARCH LOADER -->
             <div id="searchLoader">
                 <div class="spinner"></div>
                 <p>Searching...</p>
             </div>
 
             <div class="main">
-
                 <div class="panel">
                     <div id="map"></div>
                 </div>
@@ -247,9 +225,7 @@
                     </div>
 
                     <button class="navigate" id="navigateBtn">🧭 Navigate</button>
-
                 </div>
-
             </div>
 
         </div>
@@ -263,14 +239,12 @@
         const input = document.getElementById("treeInput");
         const suggestionsBox = document.getElementById("suggestionsBox");
 
-        // parse coords
+        // helpers
         function parseCoords(str) {
-            if (!str) return null;
             let parts = str.split(",");
             return { lat: parseFloat(parts[0]), lng: parseFloat(parts[1]) };
         }
 
-        // distance
         function getDistance(a, b, c, d) {
             let R = 6371000;
             let toRad = x => x * Math.PI / 180;
@@ -294,55 +268,47 @@
             header: true,
             complete: function (res) {
 
-                console.log(res.data); // debug
+                PLANTS = res.data.filter(p => p.tree_id && p.gps_coordinate);
 
-                PLANTS = res.data.filter(p => p.tree_id);
+                // 🔥 precompute search
+                PLANTS = PLANTS.map(p => ({
+                    ...p,
+                    search: (p.tree_id + " " + p.tree_name).toLowerCase()
+                }));
 
                 document.getElementById("treeCount").innerText = PLANTS.length;
 
-                // species
-                let species = {};
-                PLANTS.forEach(p => {
-                    if (p.tree_name) species[p.tree_name] = (species[p.tree_name] || 0) + 1;
-                });
-
-                Object.entries(species).forEach(([n, c]) => {
-                    let d = document.createElement("div");
-                    d.className = "species-box";
-                    d.innerText = `${n} (${c})`;
-                    d.onclick = () => filterBySpecies(n);
-                    speciesContainer.appendChild(d);
-                });
-
                 initMap();
-
-                // hide loader
                 document.getElementById("loader").style.display = "none";
-
             }
         });
 
-        // SEARCH SUGGESTIONS
+        // 🔥 DEBOUNCE SEARCH
+        let timer;
         input.addEventListener("input", () => {
-            let val = input.value.toLowerCase();
+            clearTimeout(timer);
 
-            if (!val) {
-                suggestionsBox.style.display = "none";
-                return;
-            }
+            timer = setTimeout(() => {
+                let val = input.value.toLowerCase().trim();
 
-            let results = PLANTS.filter(p =>
-                (p.tree_id + " " + p.tree_name).toLowerCase().includes(val)
-            ).slice(0, 10);
+                if (!val) {
+                    suggestionsBox.style.display = "none";
+                    return;
+                }
 
-            suggestionsBox.innerHTML = results.map(p => `
+                let results = PLANTS.filter(p => p.search.includes(val)).slice(0, 10);
+
+                suggestionsBox.innerHTML = results.map(p => `
 <div class="suggestion-item" data-id="${p.tree_id}">
 [${p.tree_id}] ${p.tree_name}
 </div>`).join("");
 
-            suggestionsBox.style.display = "block";
+                suggestionsBox.style.display = "block";
+
+            }, 300);
         });
 
+        // select suggestion
         suggestionsBox.onclick = (e) => {
             let item = e.target.closest(".suggestion-item");
             if (!item) return;
@@ -352,7 +318,7 @@
             lookup();
         };
 
-        // LOOKUP
+        // lookup
         function lookup() {
 
             document.getElementById("searchLoader").style.display = "block";
@@ -361,6 +327,7 @@
             setTimeout(() => {
 
                 let plant = PLANTS.find(p => p.tree_id == input.value.trim());
+
                 if (!plant) {
                     alert("Not found");
                     document.getElementById("searchLoader").style.display = "none";
@@ -370,9 +337,9 @@
                 document.getElementById("id").innerText = plant.tree_id;
                 document.getElementById("name").innerText = plant.tree_name;
                 document.getElementById("year").innerText = plant.planted_year;
-                document.getElementById("maintainer").innerText = plant.maintained_by || "—";
-                document.getElementById("roll").innerText = plant.roll_no || "—";
-                document.getElementById("email").innerText = plant.email_id || "—";
+                document.getElementById("maintainer").innerText = plant.maintained_by;
+                document.getElementById("roll").innerText = plant.roll_no;
+                document.getElementById("email").innerText = plant.email_id;
 
                 let p = parseCoords(plant.gps_coordinate);
                 let r = parseCoords(plant.reference_point);
@@ -399,19 +366,10 @@
                 document.getElementById("searchLoader").style.display = "none";
                 document.querySelector(".main").style.display = "flex";
 
-            }, 500);
+            }, 400);
         }
 
-        // FILTER
-        function filterBySpecies(name) {
-            let p = PLANTS.find(x => x.tree_name == name);
-            if (p) {
-                input.value = p.tree_id;
-                lookup();
-            }
-        }
-
-        // NAVIGATION
+        // navigation
         document.getElementById("navigateBtn").onclick = function () {
             let d = distanceBox.dataset;
             window.open(`https://www.google.com/maps/dir/?api=1&origin=${d.plat},${d.plng}&destination=${d.rlat},${d.rlng}`, "_blank");
