@@ -1,4 +1,4 @@
-S.NO ,Tree Name,Planted Year,Tree ID,GPS Coordinate,Photo ,maintained by ,roll no ,email id ,reference point ,department name ,link 
+S.NO,tree_name,planted_year,tree_id,gps_coordinate,photo,maintained_by,roll_no,email_id,reference_point,department_name,link
 1,Ashoka (Saraca asoca),2025,JNTUK0001,"16.97970,82.24267",https://i.postimg.cc/rm6vHHJZ/jntuk0001.jpg,paresh,23021A0348,23021a0348@jntucek.ac.in,"16.979639°,82.242278°", Chemical and Petroleum Engineering block,https://track-my-roots.onrender.com/
 2,Ashoka (Saraca asoca),2025,JNTUK0002,"16.97972,82.24258",https://i.postimg.cc/264PNxcc/jntuk0002.jpg,paresh,23021A0349,23021a0348@jntucek.ac.in,"16.979639°,82.242278°", Chemical and Petroleum Engineering block,https://track-my-roots.onrender.com/
 3,Ashoka (Saraca asoca),2025,JNTUK0003,"16.97972,82.24256",https://i.postimg.cc/LXzrFVCv/jntuk0003.jpg,paresh,23021A0350,23021a0348@jntucek.ac.in,"16.979639°,82.242278°", Chemical and Petroleum Engineering block,https://track-my-roots.onrender.com/

@@ -23,6 +23,7 @@
             background: url('/images/background.png') center/cover no-repeat;
         }
 
+        /* LOADER (PAGE) */
         #loader {
             position: fixed;
             width: 100%;
@@ -48,6 +49,13 @@
             100% {
                 transform: rotate(360deg);
             }
+        }
+
+        /* SEARCH LOADER */
+        #searchLoader {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
         }
 
         .overlay {
@@ -140,7 +148,8 @@
 
         .main {
             margin-top: 20px;
-            display: flex;
+            display: none;
+            /* 🔥 hidden initially */
             gap: 10px;
             flex-wrap: wrap;
         }
@@ -185,6 +194,7 @@
 
 <body>
 
+    <!-- PAGE LOADER -->
     <div id="loader">
         <div class="spinner"></div>
         <p>Loading trees...</p>
@@ -211,6 +221,12 @@
                 <input id="treeInput" placeholder="Search Tree ID or Name">
                 <button onclick="lookup()">Search</button>
                 <div id="suggestionsBox"></div>
+            </div>
+
+            <!-- SEARCH LOADER -->
+            <div id="searchLoader">
+                <div class="spinner"></div>
+                <p>Searching...</p>
             </div>
 
             <div class="main">
@@ -251,6 +267,7 @@
         const input = document.getElementById("treeInput");
         const suggestionsBox = document.getElementById("suggestionsBox");
 
+        // helpers
         function parseCoords(str) {
             str = str.replace(/[°"]/g, "");
             let parts = str.split(",");
@@ -274,6 +291,7 @@
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
         }
 
+        // LOAD CSV
         Papa.parse("trees.csv", {
             download: true,
             header: true,
@@ -299,6 +317,7 @@
 
                 initMap();
 
+                // hide page loader
                 document.getElementById("loader").style.display = "none";
 
             }
@@ -334,49 +353,63 @@
             lookup();
         });
 
-        // LOOKUP
+        // LOOKUP WITH LOADER
         function lookup() {
 
-            let plant = PLANTS.find(p => p["Tree ID"] == input.value.trim());
-            if (!plant) { alert("Not found"); return; }
+            document.getElementById("searchLoader").style.display = "block";
+            document.querySelector(".main").style.display = "none";
 
-            document.getElementById("id").innerText = plant["Tree ID"];
-            document.getElementById("name").innerText = plant["Tree Name"];
-            document.getElementById("year").innerText = plant["Planted Year"];
+            setTimeout(() => {
 
-            // FIXED undefined issue
-            document.getElementById("maintainer").innerText =
-                plant["maintained by"] || plant["maintained_by"] || "—";
+                let plant = PLANTS.find(p => p["Tree ID"] == input.value.trim());
 
-            document.getElementById("roll").innerText =
-                plant["roll no"] || plant["roll_no"] || "—";
+                if (!plant) {
+                    alert("Not found");
+                    document.getElementById("searchLoader").style.display = "none";
+                    return;
+                }
 
-            document.getElementById("email").innerText =
-                plant["email id"] || plant["email_id"] || "—";
+                document.getElementById("id").innerText = plant["Tree ID"];
+                document.getElementById("name").innerText = plant["Tree Name"];
+                document.getElementById("year").innerText = plant["Planted Year"];
 
-            let p = parseCoords(plant["GPS Coordinate"]);
-            let r = parseCoords(plant["reference point"]);
+                // safe access
+                document.getElementById("maintainer").innerText =
+                    plant["maintained by"] || plant["maintained_by"] || "—";
 
-            map.setView([p.lat, p.lng], 19);
+                document.getElementById("roll").innerText =
+                    plant["roll no"] || plant["roll_no"] || "—";
 
-            // remove old marker
-            if (marker) map.removeLayer(marker);
-            marker = L.marker([p.lat, p.lng]).addTo(map);
+                document.getElementById("email").innerText =
+                    plant["email id"] || plant["email_id"] || "—";
 
-            // remove old line
-            if (line) map.removeLayer(line);
-            line = L.polyline([[p.lat, p.lng], [r.lat, r.lng]], { color: 'green' }).addTo(map);
+                let p = parseCoords(plant["GPS Coordinate"]);
+                let r = parseCoords(plant["reference point"]);
 
-            let d = getDistance(p.lat, p.lng, r.lat, r.lng);
-            let text = d < 1000 ? Math.round(d) + " m" : (d / 1000).toFixed(2) + " km";
+                map.setView([p.lat, p.lng], 19);
 
-            document.getElementById("distance").innerText =
-                `Located ${text} from ${plant["department name"]}`;
+                if (marker) map.removeLayer(marker);
+                marker = L.marker([p.lat, p.lng]).addTo(map);
 
-            distanceBox.dataset.plat = p.lat;
-            distanceBox.dataset.plng = p.lng;
-            distanceBox.dataset.rlat = r.lat;
-            distanceBox.dataset.rlng = r.lng;
+                if (line) map.removeLayer(line);
+                line = L.polyline([[p.lat, p.lng], [r.lat, r.lng]], { color: 'green' }).addTo(map);
+
+                let d = getDistance(p.lat, p.lng, r.lat, r.lng);
+                let text = d < 1000 ? Math.round(d) + " m" : (d / 1000).toFixed(2) + " km";
+
+                document.getElementById("distance").innerText =
+                    `Located ${text} from ${plant["department name"]}`;
+
+                distanceBox.dataset.plat = p.lat;
+                distanceBox.dataset.plng = p.lng;
+                distanceBox.dataset.rlat = r.lat;
+                distanceBox.dataset.rlng = r.lng;
+
+                // hide loader show result
+                document.getElementById("searchLoader").style.display = "none";
+                document.querySelector(".main").style.display = "flex";
+
+            }, 500);
         }
 
         // FILTER
