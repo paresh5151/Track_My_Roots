@@ -11,7 +11,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
     <style>
-        /* 🌙 BACKGROUND */
         body {
             margin: 0;
             font-family: 'Segoe UI', sans-serif;
@@ -19,20 +18,17 @@
             color: white;
         }
 
-        /* 🎨 OVERLAY */
         .overlay {
             min-height: 100vh;
             background: linear-gradient(135deg, rgba(0, 0, 0, 0.7), rgba(16, 185, 129, 0.3));
         }
 
-        /* 📦 LAYOUT */
         .container {
             padding: 20px;
             max-width: 1200px;
             margin: auto;
         }
 
-        /* 💎 CARDS */
         .card,
         .panel {
             background: rgba(255, 255, 255, 0.08);
@@ -43,7 +39,6 @@
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
         }
 
-        /* HEADER */
         .header {
             display: flex;
             align-items: center;
@@ -60,7 +55,6 @@
             font-weight: bold;
         }
 
-        /* SEARCH */
         .search-box {
             display: flex;
             gap: 10px;
@@ -88,7 +82,6 @@
             border-radius: 10px;
         }
 
-        /* SUGGESTIONS */
         #suggestionsBox {
             position: absolute;
             top: 50px;
@@ -109,7 +102,6 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
-        /* SPECIES */
         #speciesContainer {
             display: flex;
             flex-wrap: wrap;
@@ -125,7 +117,6 @@
             border: 1px solid rgba(16, 185, 129, 0.4);
         }
 
-        /* MAIN */
         .main {
             display: none;
             margin-top: 20px;
@@ -137,13 +128,12 @@
             flex: 1;
         }
 
-        /* MAP */
         #map {
             height: 320px;
             border-radius: 10px;
+            cursor: pointer;
         }
 
-        /* 🖼️ IMAGE FIX */
         #treeImage {
             width: 100%;
             max-height: 220px;
@@ -152,7 +142,6 @@
             margin-top: 10px;
         }
 
-        /* 📍 DISTANCE BOX */
         #distance {
             background: rgba(255, 255, 255, 0.1);
             padding: 10px;
@@ -160,7 +149,6 @@
             margin-top: 10px;
         }
 
-        /* LOADER */
         .spinner {
             border: 5px solid rgba(255, 255, 255, 0.2);
             border-top: 5px solid #10b981;
@@ -177,7 +165,6 @@
             }
         }
 
-        /* MOBILE */
         @media(max-width:768px) {
             .main {
                 flex-direction: column;
@@ -216,6 +203,7 @@
             <div class="main">
                 <div class="panel">
                     <div id="map"></div>
+                    <p style="font-size:12px;opacity:0.7;">Tap map to navigate from your location</p>
                 </div>
 
                 <div class="panel">
@@ -245,7 +233,6 @@
         const input = document.getElementById("treeInput");
         const suggestionsBox = document.getElementById("suggestionsBox");
 
-        // LOAD CSV
         Papa.parse("trees.csv", {
             download: true,
             header: true,
@@ -266,7 +253,6 @@
             }
         });
 
-        // SPECIES
         function loadSpecies() {
             let species = {};
 
@@ -294,7 +280,6 @@
                 });
         }
 
-        // MAP
         function initMap() {
             map = L.map('map').setView([16.9797, 82.2426], 18);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
@@ -333,7 +318,6 @@
             lookup();
         };
 
-        // LOOKUP
         function lookup() {
 
             document.getElementById("loader").style.display = "block";
@@ -366,11 +350,34 @@
 
                 let d = getDistance(p.lat, p.lng, r.lat, r.lng);
 
-                // 🔥 FINAL FIX HERE
                 document.getElementById("distance").innerHTML =
                     `📍 Located <b>${Math.round(d)} m</b> from <b>${plant.department_name}</b>`;
 
                 window.nav = { p, r };
+
+                // 🔥 MAP CLICK NAVIGATION
+                map.off('click');
+                map.on('click', function () {
+
+                    if (!navigator.geolocation) {
+                        alert("Geolocation not supported");
+                        return;
+                    }
+
+                    navigator.geolocation.getCurrentPosition(position => {
+
+                        let userLat = position.coords.latitude;
+                        let userLng = position.coords.longitude;
+
+                        window.open(
+                            `https://www.google.com/maps/dir/?api=1&origin=${userLat},${userLng}&destination=${p.lat},${p.lng}`
+                        );
+
+                    }, () => {
+                        alert("Location access denied");
+                    });
+
+                });
 
                 document.getElementById("loader").style.display = "none";
                 document.querySelector(".main").style.display = "flex";
@@ -378,7 +385,6 @@
             }, 300);
         }
 
-        // HELPERS
         function parseCoords(s) {
             let a = s.split(",");
             return { lat: parseFloat(a[0]), lng: parseFloat(a[1]) };
