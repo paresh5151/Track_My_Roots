@@ -23,7 +23,7 @@
             background: url('/images/background.png') center/cover no-repeat;
         }
 
-        /* LOADER (PAGE) */
+        /* PAGE LOADER */
         #loader {
             position: fixed;
             width: 100%;
@@ -149,7 +149,6 @@
         .main {
             margin-top: 20px;
             display: none;
-            /* 🔥 hidden initially */
             gap: 10px;
             flex-wrap: wrap;
         }
@@ -211,7 +210,6 @@
 
             <div class="dashboard">
                 <div class="card"><b>Total Trees</b><br><span id="treeCount"></span></div>
-                <div class="card"><b>Top Tree</b><br><span id="topTree"></span></div>
             </div>
 
             <h3>🌿 Trees by Species</h3>
@@ -260,20 +258,19 @@
     <script>
 
         let PLANTS = [];
-        let map;
-        let marker;
-        let line;
+        let map, marker, line;
 
         const input = document.getElementById("treeInput");
         const suggestionsBox = document.getElementById("suggestionsBox");
 
-        // helpers
+        // parse coords
         function parseCoords(str) {
-            str = str.replace(/[°"]/g, "");
+            if (!str) return null;
             let parts = str.split(",");
             return { lat: parseFloat(parts[0]), lng: parseFloat(parts[1]) };
         }
 
+        // distance
         function getDistance(a, b, c, d) {
             let R = 6371000;
             let toRad = x => x * Math.PI / 180;
@@ -297,14 +294,16 @@
             header: true,
             complete: function (res) {
 
-                PLANTS = res.data.filter(p => p["Tree ID"]);
+                console.log(res.data); // debug
+
+                PLANTS = res.data.filter(p => p.tree_id);
 
                 document.getElementById("treeCount").innerText = PLANTS.length;
 
+                // species
                 let species = {};
                 PLANTS.forEach(p => {
-                    let n = p["Tree Name"];
-                    if (n) species[n] = (species[n] || 0) + 1;
+                    if (p.tree_name) species[p.tree_name] = (species[p.tree_name] || 0) + 1;
                 });
 
                 Object.entries(species).forEach(([n, c]) => {
@@ -317,7 +316,7 @@
 
                 initMap();
 
-                // hide page loader
+                // hide loader
                 document.getElementById("loader").style.display = "none";
 
             }
@@ -325,7 +324,7 @@
 
         // SEARCH SUGGESTIONS
         input.addEventListener("input", () => {
-            let val = input.value.toLowerCase().trim();
+            let val = input.value.toLowerCase();
 
             if (!val) {
                 suggestionsBox.style.display = "none";
@@ -333,27 +332,27 @@
             }
 
             let results = PLANTS.filter(p =>
-                (p["Tree ID"] + " " + p["Tree Name"]).toLowerCase().includes(val)
+                (p.tree_id + " " + p.tree_name).toLowerCase().includes(val)
             ).slice(0, 10);
 
             suggestionsBox.innerHTML = results.map(p => `
-<div class="suggestion-item" data-id="${p["Tree ID"]}">
-[${p["Tree ID"]}] ${p["Tree Name"]}
+<div class="suggestion-item" data-id="${p.tree_id}">
+[${p.tree_id}] ${p.tree_name}
 </div>`).join("");
 
             suggestionsBox.style.display = "block";
         });
 
-        suggestionsBox.addEventListener("click", (e) => {
+        suggestionsBox.onclick = (e) => {
             let item = e.target.closest(".suggestion-item");
             if (!item) return;
 
             input.value = item.dataset.id;
             suggestionsBox.style.display = "none";
             lookup();
-        });
+        };
 
-        // LOOKUP WITH LOADER
+        // LOOKUP
         function lookup() {
 
             document.getElementById("searchLoader").style.display = "block";
@@ -361,30 +360,22 @@
 
             setTimeout(() => {
 
-                let plant = PLANTS.find(p => p["Tree ID"] == input.value.trim());
-
+                let plant = PLANTS.find(p => p.tree_id == input.value.trim());
                 if (!plant) {
                     alert("Not found");
                     document.getElementById("searchLoader").style.display = "none";
                     return;
                 }
 
-                document.getElementById("id").innerText = plant["Tree ID"];
-                document.getElementById("name").innerText = plant["Tree Name"];
-                document.getElementById("year").innerText = plant["Planted Year"];
+                document.getElementById("id").innerText = plant.tree_id;
+                document.getElementById("name").innerText = plant.tree_name;
+                document.getElementById("year").innerText = plant.planted_year;
+                document.getElementById("maintainer").innerText = plant.maintained_by || "—";
+                document.getElementById("roll").innerText = plant.roll_no || "—";
+                document.getElementById("email").innerText = plant.email_id || "—";
 
-                // safe access
-                document.getElementById("maintainer").innerText =
-                    plant["maintained by"] || plant["maintained_by"] || "—";
-
-                document.getElementById("roll").innerText =
-                    plant["roll no"] || plant["roll_no"] || "—";
-
-                document.getElementById("email").innerText =
-                    plant["email id"] || plant["email_id"] || "—";
-
-                let p = parseCoords(plant["GPS Coordinate"]);
-                let r = parseCoords(plant["reference point"]);
+                let p = parseCoords(plant.gps_coordinate);
+                let r = parseCoords(plant.reference_point);
 
                 map.setView([p.lat, p.lng], 19);
 
@@ -398,14 +389,13 @@
                 let text = d < 1000 ? Math.round(d) + " m" : (d / 1000).toFixed(2) + " km";
 
                 document.getElementById("distance").innerText =
-                    `Located ${text} from ${plant["department name"]}`;
+                    `Located ${text} from ${plant.department_name}`;
 
                 distanceBox.dataset.plat = p.lat;
                 distanceBox.dataset.plng = p.lng;
                 distanceBox.dataset.rlat = r.lat;
                 distanceBox.dataset.rlng = r.lng;
 
-                // hide loader show result
                 document.getElementById("searchLoader").style.display = "none";
                 document.querySelector(".main").style.display = "flex";
 
@@ -414,9 +404,9 @@
 
         // FILTER
         function filterBySpecies(name) {
-            let p = PLANTS.find(x => x["Tree Name"] == name);
+            let p = PLANTS.find(x => x.tree_name == name);
             if (p) {
-                input.value = p["Tree ID"];
+                input.value = p.tree_id;
                 lookup();
             }
         }
