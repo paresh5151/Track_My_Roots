@@ -4,7 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Track My Roots</title>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
@@ -12,78 +11,24 @@
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 
     <style>
-        * {
-            box-sizing: border-box;
-        }
-
         body {
             margin: 0;
             font-family: Arial;
             background: url('/images/background.png') center/cover no-repeat;
         }
 
-        #loader {
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            background: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            flex-direction: column;
-        }
-
-        .spinner {
-            border: 6px solid #eee;
-            border-top: 6px solid #10b981;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            100% {
-                transform: rotate(360deg);
-            }
-        }
-
-        .overlay {
-            background: rgba(255, 255, 255, 0.9);
-            min-height: 100vh;
-        }
-
-        .header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 15px;
-        }
-
-        .logo {
-            height: 60px;
-        }
-
         .container {
             padding: 20px;
         }
 
-        .dashboard {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
         .card {
-            flex: 1;
             background: white;
             padding: 15px;
             border-radius: 10px;
+            margin-bottom: 10px;
         }
 
         .search-box {
-            margin-top: 15px;
             display: flex;
             gap: 10px;
             position: relative;
@@ -110,7 +55,7 @@
             background: white;
             border-radius: 8px;
             display: none;
-            max-height: 180px;
+            max-height: 200px;
             overflow-y: auto;
             z-index: 100;
         }
@@ -121,12 +66,12 @@
         }
 
         .suggestion-item:hover {
-            background: #e0f2fe;
+            background: #eee;
         }
 
         .main {
-            margin-top: 20px;
             display: none;
+            margin-top: 20px;
             gap: 10px;
             flex-wrap: wrap;
         }
@@ -139,96 +84,85 @@
         }
 
         #map {
-            height: 350px;
-            border-radius: 10px;
+            height: 300px;
         }
 
-        #distanceBox {
-            margin-top: 10px;
-            padding: 10px;
-            background: #f1f5f9;
-            border-radius: 10px;
-            cursor: pointer;
+        .spinner {
+            border: 5px solid #eee;
+            border-top: 5px solid #10b981;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: auto;
         }
 
-        button.navigate {
-            margin-top: 10px;
-            width: 100%;
-            padding: 10px;
-            background: #10b981;
-            color: white;
-            border: none;
-            border-radius: 8px;
-        }
-
-        #searchLoader {
-            display: none;
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        @media(max-width:768px) {
-            .main {
-                flex-direction: column;
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
             }
+        }
+
+        /* 🌿 species */
+        #speciesContainer {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .species-box {
+            background: #d1fae5;
+            padding: 6px 10px;
+            border-radius: 8px;
+            cursor: pointer;
         }
     </style>
 </head>
 
 <body>
 
-    <div id="loader">
-        <div class="spinner"></div>
-        <p>Loading trees...</p>
-    </div>
+    <div class="container">
 
-    <div class="overlay">
-
-        <div class="header">
-            <img src="/images/logo.png" class="logo">
-            <h2>Track My Roots</h2>
+        <div class="card">
+            Total Trees: <b id="treeCount"></b>
         </div>
 
-        <div class="container">
+        <!-- 🌿 Species -->
+        <h3>🌿 Trees by Species</h3>
+        <div id="speciesContainer"></div>
 
-            <div class="dashboard">
-                <div class="card"><b>Total Trees</b><br><span id="treeCount"></span></div>
-            </div>
-
-            <div class="search-box">
-                <input id="treeInput" placeholder="Search Tree ID or Name">
-                <button onclick="lookup()">Search</button>
-                <div id="suggestionsBox"></div>
-            </div>
-
-            <div id="searchLoader">
-                <div class="spinner"></div>
-                <p>Searching...</p>
-            </div>
-
-            <div class="main">
-                <div class="panel">
-                    <div id="map"></div>
-                </div>
-
-                <div class="panel">
-                    <p><b>ID:</b> <span id="id"></span></p>
-                    <p><b>Name:</b> <span id="name"></span></p>
-                    <p><b>Year:</b> <span id="year"></span></p>
-                    <p><b>Maintained:</b> <span id="maintainer"></span></p>
-                    <p><b>Roll:</b> <span id="roll"></span></p>
-                    <p><b>Email:</b> <span id="email"></span></p>
-
-                    <div id="distanceBox">
-                        <span id="distance"></span>
-                        <div style="font-size:12px;">Click for navigation</div>
-                    </div>
-
-                    <button class="navigate" id="navigateBtn">🧭 Navigate</button>
-                </div>
-            </div>
-
+        <div class="search-box">
+            <input id="treeInput" placeholder="Search Tree ID or Name">
+            <button onclick="lookup()">Search</button>
+            <div id="suggestionsBox"></div>
         </div>
+
+        <div id="loader" style="display:none;text-align:center;margin-top:10px;">
+            <div class="spinner"></div>
+        </div>
+
+        <div class="main">
+            <div class="panel">
+                <div id="map"></div>
+            </div>
+
+            <div class="panel">
+                <p><b>ID:</b> <span id="id"></span></p>
+                <p><b>Name:</b> <span id="name"></span></p>
+                <p><b>Year:</b> <span id="year"></span></p>
+                <p><b>Maintained:</b> <span id="maintainer"></span></p>
+                <p><b>Roll:</b> <span id="roll"></span></p>
+                <p><b>Email:</b> <span id="email"></span></p>
+
+                <img id="treeImage" width="100%">
+
+                <p id="distance"></p>
+
+                <button onclick="navigate()">🧭 Navigate</button>
+            </div>
+        </div>
+
     </div>
 
     <script>
@@ -239,56 +173,76 @@
         const input = document.getElementById("treeInput");
         const suggestionsBox = document.getElementById("suggestionsBox");
 
-        // helpers
-        function parseCoords(str) {
-            let parts = str.split(",");
-            return { lat: parseFloat(parts[0]), lng: parseFloat(parts[1]) };
-        }
-
-        function getDistance(a, b, c, d) {
-            let R = 6371000;
-            let toRad = x => x * Math.PI / 180;
-            let dLat = toRad(c - a);
-            let dLon = toRad(d - b);
-            let val = Math.sin(dLat / 2) ** 2 +
-                Math.cos(toRad(a)) * Math.cos(toRad(c)) *
-                Math.sin(dLon / 2) ** 2;
-            return R * 2 * Math.atan2(Math.sqrt(val), Math.sqrt(1 - val));
-        }
-
-        function initMap() {
-            if (map) return;
-            map = L.map('map').setView([16.9797, 82.2426], 18);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-        }
-
         // LOAD CSV
         Papa.parse("trees.csv", {
             download: true,
             header: true,
             complete: function (res) {
 
-                PLANTS = res.data.filter(p => p.tree_id && p.gps_coordinate);
-
-                // 🔥 precompute search
-                PLANTS = PLANTS.map(p => ({
-                    ...p,
-                    search: (p.tree_id + " " + p.tree_name).toLowerCase()
-                }));
+                PLANTS = res.data
+                    .filter(p => p.tree_id)
+                    .map(p => ({
+                        ...p,
+                        search: (p.tree_id + " " + p.tree_name).toLowerCase()
+                    }));
 
                 document.getElementById("treeCount").innerText = PLANTS.length;
 
                 initMap();
-                document.getElementById("loader").style.display = "none";
+                loadSpecies();
+
             }
         });
 
-        // 🔥 DEBOUNCE SEARCH
+        // 🌿 SPECIES FUNCTION
+        function loadSpecies() {
+
+            let species = {};
+
+            PLANTS.forEach(p => {
+                if (p.tree_name) {
+                    species[p.tree_name] = (species[p.tree_name] || 0) + 1;
+                }
+            });
+
+            let container = document.getElementById("speciesContainer");
+            container.innerHTML = "";
+
+            Object.entries(species)
+                .sort((a, b) => b[1] - a[1])
+                .forEach(([name, count]) => {
+
+                    let div = document.createElement("div");
+                    div.className = "species-box";
+                    div.innerText = `${name} (${count})`;
+
+                    div.onclick = () => {
+                        let plant = PLANTS.find(p => p.tree_name === name);
+                        if (plant) {
+                            input.value = plant.tree_id;
+                            lookup();
+                        }
+                    };
+
+                    container.appendChild(div);
+
+                });
+        }
+
+        // MAP
+        function initMap() {
+            map = L.map('map').setView([16.9797, 82.2426], 18);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+        }
+
+        // SEARCH SUGGESTIONS
         let timer;
+
         input.addEventListener("input", () => {
             clearTimeout(timer);
 
             timer = setTimeout(() => {
+
                 let val = input.value.toLowerCase().trim();
 
                 if (!val) {
@@ -298,30 +252,37 @@
 
                 let results = PLANTS.filter(p => p.search.includes(val)).slice(0, 10);
 
+                if (results.length === 0) {
+                    suggestionsBox.style.display = "none";
+                    return;
+                }
+
                 suggestionsBox.innerHTML = results.map(p => `
 <div class="suggestion-item" data-id="${p.tree_id}">
-[${p.tree_id}] ${p.tree_name}
-</div>`).join("");
+<b>${p.tree_id}</b> - ${p.tree_name}
+</div>
+`).join("");
 
                 suggestionsBox.style.display = "block";
 
             }, 300);
         });
 
-        // select suggestion
-        suggestionsBox.onclick = (e) => {
+        // CLICK
+        suggestionsBox.addEventListener("click", (e) => {
             let item = e.target.closest(".suggestion-item");
             if (!item) return;
 
             input.value = item.dataset.id;
             suggestionsBox.style.display = "none";
-            lookup();
-        };
 
-        // lookup
+            lookup();
+        });
+
+        // LOOKUP
         function lookup() {
 
-            document.getElementById("searchLoader").style.display = "block";
+            document.getElementById("loader").style.display = "block";
             document.querySelector(".main").style.display = "none";
 
             setTimeout(() => {
@@ -330,7 +291,6 @@
 
                 if (!plant) {
                     alert("Not found");
-                    document.getElementById("searchLoader").style.display = "none";
                     return;
                 }
 
@@ -341,6 +301,9 @@
                 document.getElementById("roll").innerText = plant.roll_no;
                 document.getElementById("email").innerText = plant.email_id;
 
+                document.getElementById("treeImage").src =
+                    plant.photo || "https://via.placeholder.com/300";
+
                 let p = parseCoords(plant.gps_coordinate);
                 let r = parseCoords(plant.reference_point);
 
@@ -350,34 +313,39 @@
                 marker = L.marker([p.lat, p.lng]).addTo(map);
 
                 if (line) map.removeLayer(line);
-                line = L.polyline([[p.lat, p.lng], [r.lat, r.lng]], { color: 'green' }).addTo(map);
+                line = L.polyline([[p.lat, p.lng], [r.lat, r.lng]]).addTo(map);
 
                 let d = getDistance(p.lat, p.lng, r.lat, r.lng);
-                let text = d < 1000 ? Math.round(d) + " m" : (d / 1000).toFixed(2) + " km";
+                document.getElementById("distance").innerText = "Distance: " + Math.round(d) + " m";
 
-                document.getElementById("distance").innerText =
-                    `Located ${text} from ${plant.department_name}`;
+                window.nav = { p, r };
 
-                distanceBox.dataset.plat = p.lat;
-                distanceBox.dataset.plng = p.lng;
-                distanceBox.dataset.rlat = r.lat;
-                distanceBox.dataset.rlng = r.lng;
-
-                document.getElementById("searchLoader").style.display = "none";
+                document.getElementById("loader").style.display = "none";
                 document.querySelector(".main").style.display = "flex";
 
-            }, 400);
+            }, 300);
         }
 
-        // navigation
-        document.getElementById("navigateBtn").onclick = function () {
-            let d = distanceBox.dataset;
-            window.open(`https://www.google.com/maps/dir/?api=1&origin=${d.plat},${d.plng}&destination=${d.rlat},${d.rlng}`, "_blank");
-        };
+        // HELPERS
+        function parseCoords(s) {
+            let a = s.split(",");
+            return { lat: parseFloat(a[0]), lng: parseFloat(a[1]) };
+        }
 
-        document.getElementById("distanceBox").onclick = function () {
-            document.getElementById("navigateBtn").click();
-        };
+        function getDistance(a, b, c, d) {
+            let R = 6371000;
+            let toRad = x => x * Math.PI / 180;
+            let dLat = toRad(c - a);
+            let dLon = toRad(d - b);
+            let val = Math.sin(dLat / 2) ** 2 +
+                Math.cos(toRad(a)) * Math.cos(toRad(c)) * Math.sin(dLon / 2) ** 2;
+            return R * 2 * Math.atan2(Math.sqrt(val), Math.sqrt(1 - val));
+        }
+
+        function navigate() {
+            let { p, r } = window.nav;
+            window.open(`https://www.google.com/maps/dir/?api=1&origin=${p.lat},${p.lng}&destination=${r.lat},${r.lng}`);
+        }
 
     </script>
 
