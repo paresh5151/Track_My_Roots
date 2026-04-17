@@ -23,11 +23,8 @@
             background: url('/images/background.png') center/cover no-repeat;
         }
 
-        /* LOADING SCREEN */
         #loader {
             position: fixed;
-            top: 0;
-            left: 0;
             width: 100%;
             height: 100%;
             background: white;
@@ -188,7 +185,6 @@
 
 <body>
 
-    <!-- LOADER -->
     <div id="loader">
         <div class="spinner"></div>
         <p>Loading trees...</p>
@@ -249,12 +245,12 @@
 
         let PLANTS = [];
         let map;
+        let marker;
         let line;
 
         const input = document.getElementById("treeInput");
         const suggestionsBox = document.getElementById("suggestionsBox");
 
-        // helpers
         function parseCoords(str) {
             str = str.replace(/[°"]/g, "");
             let parts = str.split(",");
@@ -278,7 +274,6 @@
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
         }
 
-        // LOAD CSV
         Papa.parse("trees.csv", {
             download: true,
             header: true,
@@ -288,14 +283,13 @@
 
                 document.getElementById("treeCount").innerText = PLANTS.length;
 
-                // species
                 let species = {};
                 PLANTS.forEach(p => {
                     let n = p["Tree Name"];
                     if (n) species[n] = (species[n] || 0) + 1;
                 });
 
-                Object.entries(species).sort((a, b) => b[1] - a[1]).forEach(([n, c]) => {
+                Object.entries(species).forEach(([n, c]) => {
                     let d = document.createElement("div");
                     d.className = "species-box";
                     d.innerText = `${n} (${c})`;
@@ -303,28 +297,8 @@
                     speciesContainer.appendChild(d);
                 });
 
-                let top = Object.entries(species)[0];
-                if (top) document.getElementById("topTree").innerText = `${top[0]} (${top[1]})`;
-
                 initMap();
 
-                // markers
-                PLANTS.forEach(p => {
-                    let coords = p["GPS Coordinate"];
-                    if (!coords) return;
-
-                    let parsed = parseCoords(coords);
-
-                    let marker = L.marker([parsed.lat, parsed.lng]).addTo(map)
-                        .bindPopup(p["Tree Name"]);
-
-                    marker.on("click", () => {
-                        input.value = p["Tree ID"];
-                        lookup();
-                    });
-                });
-
-                // 🔥 HIDE LOADER
                 document.getElementById("loader").style.display = "none";
 
             }
@@ -343,11 +317,6 @@
                 (p["Tree ID"] + " " + p["Tree Name"]).toLowerCase().includes(val)
             ).slice(0, 10);
 
-            if (results.length === 0) {
-                suggestionsBox.style.display = "none";
-                return;
-            }
-
             suggestionsBox.innerHTML = results.map(p => `
 <div class="suggestion-item" data-id="${p["Tree ID"]}">
 [${p["Tree ID"]}] ${p["Tree Name"]}
@@ -365,26 +334,36 @@
             lookup();
         });
 
-        // lookup
+        // LOOKUP
         function lookup() {
 
-            let id = input.value.trim();
-            let plant = PLANTS.find(p => p["Tree ID"] == id);
-
+            let plant = PLANTS.find(p => p["Tree ID"] == input.value.trim());
             if (!plant) { alert("Not found"); return; }
 
             document.getElementById("id").innerText = plant["Tree ID"];
             document.getElementById("name").innerText = plant["Tree Name"];
             document.getElementById("year").innerText = plant["Planted Year"];
-            document.getElementById("maintainer").innerText = plant["maintained by"];
-            document.getElementById("roll").innerText = plant["roll no"];
-            document.getElementById("email").innerText = plant["email id"];
+
+            // FIXED undefined issue
+            document.getElementById("maintainer").innerText =
+                plant["maintained by"] || plant["maintained_by"] || "—";
+
+            document.getElementById("roll").innerText =
+                plant["roll no"] || plant["roll_no"] || "—";
+
+            document.getElementById("email").innerText =
+                plant["email id"] || plant["email_id"] || "—";
 
             let p = parseCoords(plant["GPS Coordinate"]);
             let r = parseCoords(plant["reference point"]);
 
             map.setView([p.lat, p.lng], 19);
 
+            // remove old marker
+            if (marker) map.removeLayer(marker);
+            marker = L.marker([p.lat, p.lng]).addTo(map);
+
+            // remove old line
             if (line) map.removeLayer(line);
             line = L.polyline([[p.lat, p.lng], [r.lat, r.lng]], { color: 'green' }).addTo(map);
 
@@ -400,7 +379,7 @@
             distanceBox.dataset.rlng = r.lng;
         }
 
-        // filter
+        // FILTER
         function filterBySpecies(name) {
             let p = PLANTS.find(x => x["Tree Name"] == name);
             if (p) {
@@ -409,7 +388,7 @@
             }
         }
 
-        // navigation
+        // NAVIGATION
         document.getElementById("navigateBtn").onclick = function () {
             let d = distanceBox.dataset;
             window.open(`https://www.google.com/maps/dir/?api=1&origin=${d.plat},${d.plng}&destination=${d.rlat},${d.rlng}`, "_blank");
